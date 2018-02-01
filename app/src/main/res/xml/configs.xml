@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="基础设置">
+        <SwitchPreference
+            android:defaultValue="false"
+            android:summaryOff="“跳一跳”辅助已经关闭"
+            android:summaryOn="“跳一跳”辅助已经打开"
+            android:title="总开关" />
+        <ListPreference
+            android:defaultValue="@string/action_bar_show_manually"
+            android:dialogTitle="选择辅助开启方式"
+            android:entries="@array/action_bar_show_mode"
+            android:entryValues="@array/action_bar_show_mode"
+            android:summary="@string/action_bar_show_manually"
+            android:title="辅助开启方式" />
+
+    </PreferenceCategory>
+    <PreferenceCategory android:title="权限管理">
+        <CheckBoxPreference
+            android:summary="显示悬浮操作栏、模拟点击屏幕"
+            android:title="无障碍服务" />
+        <CheckBoxPreference
+            android:summary="无ROOT情况下，完成屏幕截图"
+            android:title="屏幕录制" />
+        <CheckBoxPreference
+            android:summary="辅助出现错误时，保存截图和参数"
+            android:title="存储权限" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="参数调校">
+
+        <EditTextPreference
+            android:defaultValue="1.18181818"
+            android:inputType="numberSigned|numberDecimal"
+            android:summary="屏幕截图中小瓶子的缩放比例，原始大小为66x178"
+            android:title="小瓶子缩放比" />
+        <EditTextPreference
+            android:defaultValue="1.392"
+            android:summary="按压时间与跳远距离的关系"
+            android:title="跳跃系数" />
+        <PreferenceScreen
+            android:summary="从屏幕截图中识别台阶边缘"
+            android:title="物体边缘检测">
+            <EditTextPreference
+                android:defaultValue="40"
+                android:digits="1234567890"
+                android:inputType="numberDecimal"
+                android:title="边缘检测下界限" />
+            <EditTextPreference
+                android:defaultValue="80"
+                android:digits="1234567890"
+                android:inputType="numberDecimal"
+                android:title="边缘检测上界限" />
+        </PreferenceScreen>
+
+        <PreferenceScreen
+            android:summary="2.5D游戏场景中x轴、y轴、z轴的长度关系，满足勾股定理"
+            android:title="三边关系">
+            <EditTextPreference
+                android:defaultValue="100"
+                android:inputType="numberDecimal|numberSigned"
+                android:summary="屏幕中的水平边"
+                android:title="X轴" />
+            <EditTextPreference
+                android:defaultValue="58"
+                android:inputType="numberDecimal|numberSigned"
+                android:summary="屏幕中的竖直边"
+                android:title="Y轴" />
+            <EditTextPreference
+                android:defaultValue="115.602768"
+                android:inputType="numberDecimal|numberSigned"
+                android:summary="屏幕上的斜边，即连续两次落点之间的连线"
+                android:title="Z轴" />
+        </PreferenceScreen>
+    </PreferenceCategory>
+</PreferenceScreen>

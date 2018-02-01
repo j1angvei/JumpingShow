@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="action_bar_show_mode">
+        <item>@string/action_bar_show_manually</item>
+        <item>@string/action_bar_show_automatically</item>
+        <item>@string/action_bar_show_never</item>
+    </string-array>
+</resources>
