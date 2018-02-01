@@ -15,12 +15,38 @@
     </style>
 
     <style name="AppTheme.Toggle" parent="Widget.AppCompat.Button.Borderless">
-        <item name="android:background">@drawable/bg_toggle</item>
         <item name="android:minWidth">0dp</item>
         <item name="android:minHeight">0dp</item>
-        <item name="android:padding">8dp</item>
-        <item name="android:layout_margin">8dp</item>
         <item name="android:textColor">@color/text_toggle</item>
     </style>
 
+    <style name="AppTheme.Button">
+        <item name="android:layout_width">48dp</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:layout_marginEnd">8dp</item>
+        <item name="android:layout_marginStart">8dp</item>
+    </style>
+
+    <style name="AppTheme.Button.Image">
+        <item name="android:contentDescription">@string/app_name</item>
+        <item name="android:scaleType">centerCrop</item>
+        <item name="android:padding">4dp</item>
+        <item name="android:background">@color/transparent</item>
+    </style>
+
+    <style name="AppTheme.Button.Toggle">
+        <item name="android:textOn">@null</item>
+        <item name="android:textOff">@null</item>
+
+    </style>
+    <!--<ToggleButton-->
+    <!--android:layout_width="48dp"-->
+    <!--android:layout_height="48dp"-->
+    <!--android:id="@+id/tb_auto"-->
+    <!--android:layout_marginEnd="8dp"-->
+    <!--android:layout_marginStart="8dp"-->
+    <!--android:background="@drawable/bg_toggle_repeat"-->
+    <!--android:checked="true"-->
+    <!--android:textOff="@null"-->
+    <!--android:textOn="@null" />-->
 </resources>

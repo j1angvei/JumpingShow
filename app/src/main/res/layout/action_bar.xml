@@ -3,44 +3,33 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="center_horizontal"
-    android:background="#66FFFFFF"
+    android:background="#55FFFFFF"
     android:gravity="center"
-    android:orientation="horizontal"
-    android:padding="8dp">
+    android:orientation="horizontal">
 
-    <ImageView
+    <ImageButton
+        style="@style/AppTheme.Button.Image"
         android:id="@+id/ib_hand"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:src="@drawable/bg_drag" />
 
     <ToggleButton
-        style="@style/AppTheme.Toggle"
         android:id="@+id/tb_auto"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:checked="false"
-        android:textOff="手动"
-        android:textOn="自动" />
+        style="@style/AppTheme.Button.Toggle"
+        android:background="@drawable/bg_toggle_repeat"
+        android:checked="true" />
 
-    <ImageView
-        android:id="@+id/ib_to_config"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/ic_config" />
-
-    <ToggleButton
-        style="@style/AppTheme.Toggle"
+    <ImageButton
+        style="@style/AppTheme.Button.Image"
         android:id="@+id/tb_jump"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textOff="计时"
-        android:textOn="代跳" />
+        android:src="@drawable/ic_trending_up_black_24dp" />
 
-    <ImageView
+    <ImageButton
+        android:id="@+id/ib_to_config"
+        style="@style/AppTheme.Button.Image"
+        android:src="@drawable/ic_settings_black_24dp" />
+
+    <ImageButton
+        style="@style/AppTheme.Button.Image"
         android:id="@+id/ib_exit"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/ic_exit"
-        android:text="退出" />
+        android:src="@drawable/ic_exit_to_app_black_24dp" />
 </LinearLayout>
