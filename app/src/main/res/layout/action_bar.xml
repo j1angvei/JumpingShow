@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_horizontal"
+    android:background="#66FFFFFF"
+    android:gravity="center"
+    android:orientation="horizontal"
+    android:padding="8dp">
+
+    <ImageView
+        android:id="@+id/ib_hand"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/bg_drag" />
+
+    <ToggleButton
+        style="@style/AppTheme.Toggle"
+        android:id="@+id/tb_auto"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:checked="false"
+        android:textOff="手动"
+        android:textOn="自动" />
+
+    <ImageView
+        android:id="@+id/ib_to_config"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_config" />
+
+    <ToggleButton
+        style="@style/AppTheme.Toggle"
+        android:id="@+id/tb_jump"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textOff="计时"
+        android:textOn="代跳" />
+
+    <ImageView
+        android:id="@+id/ib_exit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_exit"
+        android:text="退出" />
+</LinearLayout>
