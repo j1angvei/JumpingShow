@@ -1,13 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-
-    <ImageButton
-        style="@style/AppTheme.Button.Image"
-        android:id="@+id/ib_hand"
-        android:src="@drawable/bg_drag"
-        tools:ignore="ContentDescription" />
-
     <ToggleButton
         android:id="@+id/tb_auto"
         style="@style/AppTheme.Button.Toggle"
@@ -15,16 +8,19 @@
         android:checked="true" />
 
     <ImageButton
+        tools:ignore="ContentDescription"
         style="@style/AppTheme.Button.Image"
         android:id="@+id/ib_jump"
         android:src="@drawable/ic_trending_up_black_24dp" />
 
     <ImageButton
+        tools:ignore="ContentDescription"
         android:id="@+id/ib_to_config"
         style="@style/AppTheme.Button.Image"
         android:src="@drawable/ic_settings_black_24dp" />
 
     <ImageButton
+        tools:ignore="ContentDescription"
         style="@style/AppTheme.Button.Image"
         android:id="@+id/ib_exit"
         android:src="@drawable/ic_exit_to_app_black_24dp" />

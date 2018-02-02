@@ -5,12 +5,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
-import android.view.Gravity;
+import android.util.Log;
+import android.view.MotionEvent;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
-import android.widget.LinearLayout;
 
 import java.util.List;
 
@@ -20,6 +21,7 @@ import java.util.List;
  */
 
 public class BackstageService extends AccessibilityService {
+    private static final String TAG = BackstageService.class.getSimpleName();
     private static final String GAME_ENTRY_TEXT = "跳一跳";
     private static final String GAME_ENTRY_WIDGET = "android.widget.TextView";
 
@@ -27,15 +29,20 @@ public class BackstageService extends AccessibilityService {
 
     private WindowManager mWindowManager;
     private ActionBar mActionBar;
-
     private ActionBar.ShowMode mShowMode;
+    private ActionBar.OnActionListener mActionListener;
+    private WindowManager.LayoutParams mLayoutParams;
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
         int eventType = event.getEventType();
         AccessibilityNodeInfo rootNode = getRootInActiveWindow();
         if (gameEntryVisible(eventType, rootNode)) {
-            addActionBar();
+            try {
+                addActionBar();
+            } catch (Exception e) {
+                Log.e(TAG, "onAccessibilityEvent: ", e);
+            }
         }
     }
 
@@ -90,25 +97,62 @@ public class BackstageService extends AccessibilityService {
     /**
      * 显示辅助动作栏
      */
-    private void addActionBar() {
+    private void addActionBar() throws Exception {
         if (mActionBar != null) {
             LogUtils.d("ActionBar already added");
             return;
         }
 
-        mActionBar = new ActionBar(this);
-        mActionBar.setOrientation(LinearLayout.HORIZONTAL);
-
-        WindowManager.LayoutParams params = new WindowManager.LayoutParams(
+        mLayoutParams = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSLUCENT
         );
-        params.gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
-        params.verticalMargin = 0.2f;
-        mWindowManager.addView(mActionBar, params);
+
+        mActionBar = new ActionBar(this);
+//        mActionBar.setOrientation(LinearLayout.HORIZONTAL);
+//        mActionBar.setPadding(16, 16, 16, 16);
+        mActionBar.setOnTouchListener(new View.OnTouchListener() {
+            //按下动作发生的时候，动作栏的坐标
+            private int initX, initY;
+            //按下动作所在的坐标
+            private float initTouchX, initTouchY;
+
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        initX = mLayoutParams.x;
+                        initY = mLayoutParams.y;
+                        initTouchX = event.getRawX();
+                        initTouchY = event.getRawY();
+                        return true;
+                    case MotionEvent.ACTION_MOVE:
+                        mLayoutParams.x = initX + (int) (event.getRawX() - initTouchX);
+                        mLayoutParams.y = initY + (int) (event.getRawY() - initTouchY);
+                        mWindowManager.updateViewLayout(mActionBar, mLayoutParams);
+                        return true;
+                }
+                return false;
+            }
+        });
+
+        mWindowManager.addView(mActionBar, mLayoutParams);
+
+        //回调函数，包括点击跳跃，拖曳窗口
+        mActionListener = new ActionBar.OnActionListener() {
+            @Override
+            public void onDragged(float dx, float dy) {
+                Log.d(TAG, "onDragged: " + dx + "\t" + dy);
+                mLayoutParams.x += dx;
+                mLayoutParams.y -= dy;
+                mWindowManager.updateViewLayout(mActionBar, mLayoutParams);
+            }
+        };
+        mActionBar.setActionListener(mActionListener);
+
     }
 
     /**
@@ -138,7 +182,11 @@ public class BackstageService extends AccessibilityService {
                     case PrefsUtils.KEY_ACTION_BAR_SHOW_MODE:
                         mShowMode = PrefsUtils.getActionBarShowMode(BackstageService.this);
                         if (mShowMode == ActionBar.ShowMode.MANUALLY) {
-                            addActionBar();
+                            try {
+                                addActionBar();
+                            } catch (Exception e) {
+                                Log.e(TAG, "onSharedPreferenceChanged: ", e);
+                            }
                         } else {
                             removeActionBar();
                         }
