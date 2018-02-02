@@ -8,7 +8,7 @@
             android:summaryOn="“跳一跳”辅助已经打开"
             android:title="总开关" />
         <ListPreference
-            android:key="show_mode"
+            android:key="action_bar_show_mode"
             android:defaultValue="@string/action_bar_show_manually"
             android:dialogTitle="选择辅助开启方式"
             android:entries="@array/action_bar_show_mode"
@@ -72,7 +72,7 @@
     </PreferenceCategory>
     <PreferenceCategory android:title="随机设置">
         <PreferenceScreen
-            android:summary="针对音乐盒、下水道、魔方等的处理方式"
+            android:summary="针对音乐盒、下水道、魔方、超市等的处理方式"
             android:title="加分项">
             <PreferenceCategory android:title="停留设置">
 

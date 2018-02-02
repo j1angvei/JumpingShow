@@ -5,4 +5,7 @@
     <string name="action_bar_show_automatically">通知打开辅助</string>
     <string name="action_bar_show_never">关闭辅助</string>
 
+    <!--无障碍服务-->
+    <string name="label_accessibility_service">“跳一跳”辅助</string>
+    <string name="description_accessibility_usage">辅助程序需要通过无障碍服务实现“跳一跳”辅助功能：\n\n\t1. “跳一跳”游戏界面显示悬浮操作栏\n\t2. 模拟用户点按屏幕\n\n只有开启无障碍服务后，辅助程序才能正确执行。</string>
 </resources>

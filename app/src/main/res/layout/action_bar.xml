@@ -1,18 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_gravity="center_horizontal"
-    android:background="#55FFFFFF"
-    tools:ignore="ContentDescription"
-    android:gravity="center"
-    android:orientation="horizontal">
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <ImageButton
         style="@style/AppTheme.Button.Image"
         android:id="@+id/ib_hand"
-        android:src="@drawable/bg_drag" />
+        android:src="@drawable/bg_drag"
+        tools:ignore="ContentDescription" />
 
     <ToggleButton
         android:id="@+id/tb_auto"
@@ -22,7 +16,7 @@
 
     <ImageButton
         style="@style/AppTheme.Button.Image"
-        android:id="@+id/tb_jump"
+        android:id="@+id/ib_jump"
         android:src="@drawable/ic_trending_up_black_24dp" />
 
     <ImageButton
@@ -34,4 +28,4 @@
         style="@style/AppTheme.Button.Image"
         android:id="@+id/ib_exit"
         android:src="@drawable/ic_exit_to_app_black_24dp" />
-</LinearLayout>
+</merge>
