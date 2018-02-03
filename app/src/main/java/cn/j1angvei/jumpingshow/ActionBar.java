@@ -2,8 +2,15 @@ package cn.j1angvei.jumpingshow;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.graphics.PixelFormat;
+import android.hardware.display.DisplayManager;
+import android.hardware.display.VirtualDisplay;
+import android.media.Image;
+import android.media.ImageReader;
 import android.media.projection.MediaProjection;
+import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
@@ -19,19 +26,31 @@ import android.widget.ToggleButton;
  * @since 2018/2/1
  */
 
-public class ActionBar extends LinearLayout implements View.OnTouchListener {
-    private static final String TAG = ActionBar.class.getSimpleName();
-    //checked为true时，自动进行截屏、跳跃操作，否则为手动
+public class ActionBar extends LinearLayout {
+
+    private static final Object LOCK = new Object();
+
     private ToggleButton tbAuto;
-    //计算按压时长并点击屏幕
     private ImageButton ibJump;
-    //前往设置界面
     private ImageButton ibConfig;
-    //关闭操作栏并退出
     private ImageButton ibExit;
 
     private OnActionListener mActionListener;
     private MediaProjection mMediaProjection;
+    private int mWidth, mHeight, mDpi;
+    private ImageReader mImageReader;
+
+    /**
+     * true表示有一张截图正在处理
+     */
+    private boolean mInProcess;
+
+    /**
+     * true表示已经得到一张截图
+     */
+    private boolean mScreenshotTaken;
+
+    private VirtualDisplay mVirtualDisplay;
 
     public ActionBar(Context context) {
         this(context, null);
@@ -53,15 +72,103 @@ public class ActionBar extends LinearLayout implements View.OnTouchListener {
     }
 
     private void init() {
-        inflate(getContext(), R.layout.action_bar, this);
+        //初始化参数，成员变量等
+        initArgs();
+        //初始化控件元素
+        initWidgets();
+        //初始化点击、触摸等事件
+        initListeners();
+        //初始化View的数据显示等
+        initData();
+    }
 
+    private void initArgs() {
         mMediaProjection = JSApplication.getInstance().getMediaProjection();
+        int[] screenParams = AppUtils.getScreenParams(getContext());
+        mWidth = screenParams[0];
+        mHeight = screenParams[1];
+        mDpi = screenParams[2];
+        mImageReader = ImageReader.newInstance(mWidth, mHeight, PixelFormat.RGBA_8888, 2);
+        mImageReader.setOnImageAvailableListener(new ImageReader.OnImageAvailableListener() {
+            @Override
+            public void onImageAvailable(ImageReader reader) {
+                //不在处理图片过程，不做任何处理
+                if (!mInProcess) {
+                    return;
+                }
+                //已经得到一张截图，不再继续获取截图
+                if (mScreenshotTaken) {
+                    return;
+                }
+                reader.acquireLatestImage();
+
+            }
+        }, null);
+
+    }
+
+    private void initWidgets() {
+        inflate(getContext(), R.layout.action_bar, this);
 
         tbAuto = findViewById(R.id.tb_auto);
         ibJump = findViewById(R.id.ib_jump);
         ibConfig = findViewById(R.id.ib_to_config);
         ibExit = findViewById(R.id.ib_exit);
+    }
 
+    private void initListeners() {
+        //跳转到设置
+        ibConfig.setOnClickListener(v -> AppUtils.toConfigs(getContext()));
+        //点移除动作栏
+        ibExit.setOnClickListener(v -> mActionListener.onRemove());
+        //开始辅助跳跃
+        ibJump.setOnClickListener(v -> {
+            //录屏权限需要重新申请
+            if (mMediaProjection == null) {
+                AppUtils.toast(getContext(), "录屏权限失效，重新申请");
+                AppUtils.requestScreenCapturePermission(getContext());
+            } else {
+                //录屏权限满足，可以截图
+                mInProcess = true;
+                ibJump.setEnabled(false);
+                mVirtualDisplay = mMediaProjection.createVirtualDisplay("screen-capture",
+                        mWidth, mHeight, mDpi, DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
+                        mImageReader.getSurface(), null, null
+                );
+            }
+        });
+        //实现动作栏拖曳
+        setOnTouchListener(new OnTouchListener() {
+            //记录拖曳开始的上次坐标
+            private float lastX, lastY;
+
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        lastX = event.getRawX();
+                        lastY = event.getRawY();
+                        v.setPressed(true);
+                        return true;
+                    case MotionEvent.ACTION_MOVE:
+                        float currentX = event.getRawX();
+                        float currentY = event.getRawY();
+                        mActionListener.onDrag(currentX - lastX, currentY - lastY);
+                        lastX = currentX;
+                        lastY = currentY;
+                        return true;
+                    case MotionEvent.ACTION_UP:
+                    case MotionEvent.ACTION_OUTSIDE:
+                    case MotionEvent.ACTION_CANCEL:
+                        v.setPressed(false);
+                        return true;
+                }
+                return false;
+            }
+        });
+    }
+
+    private void initData() {
         //添加动画，透明度从0到1
         ViewCompat.setAlpha(tbAuto, 0);
         ViewCompat.setAlpha(ibJump, 0);
@@ -83,66 +190,28 @@ public class ActionBar extends LinearLayout implements View.OnTouchListener {
         setPadding(20, 20, 20, 20);
         setOrientation(HORIZONTAL);
         postDelayed(() -> setBackgroundResource(R.drawable.bg_action_bar), 860);
-
-        //点击事件，跳转到设置
-        ibConfig.setOnClickListener(v -> AppUtils.toConfigs(getContext()));
-        //点击事件，移除动作栏
-        ibExit.setOnClickListener(v -> mActionListener.onRemove());
-
-        //点击事件，开始辅助跳跃
-        ibJump.setOnClickListener(v -> {
-            if (mMediaProjection == null) {
-                AppUtils.toast(getContext(), "录屏权限失效，重新申请");
-                AppUtils.requestScreenCapturePermission(getContext());
-                ibJump.setEnabled(false);
-                ibJump.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        mMediaProjection = JSApplication.getInstance().getMediaProjection();
-                        ibJump.setEnabled(true);
-                    }
-                }, 3000);
-            } else {
-                jumpOnce();
-            }
-        });
-
-        //实现拖曳事件
-        setOnTouchListener(this);
-
-
     }
 
-
-    private void jumpOnce() {
-        AppUtils.toast(getContext(), "Jump");
-    }
-
-    //记录拖曳开始的上次坐标
-    private float lastX, lastY;
-
-    @Override
-    public boolean onTouch(View v, MotionEvent event) {
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                lastX = event.getRawX();
-                lastY = event.getRawY();
-                v.setPressed(true);
-                return true;
-            case MotionEvent.ACTION_MOVE:
-                float currentX = event.getRawX();
-                float currentY = event.getRawY();
-                mActionListener.onDrag(currentX - lastX, currentY - lastY);
-                lastX = currentX;
-                lastY = currentY;
-                return true;
-            case MotionEvent.ACTION_UP:
-            case MotionEvent.ACTION_OUTSIDE:
-            case MotionEvent.ACTION_CANCEL:
-                v.setPressed(false);
-                return true;
+    /**
+     * 在后台线程操作
+     */
+    private void jumpOnce() throws RuntimeException {
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            throw new RuntimeException("Run jump operation in background");
         }
-        return false;
+
+
+    }
+
+    public void setActionListener(OnActionListener actionListener) {
+        mActionListener = actionListener;
+    }
+
+    public interface OnActionListener {
+        void onDrag(float dx, float dy);
+
+        void onRemove();
+
     }
 
     public enum ShowMode {
@@ -161,14 +230,20 @@ public class ActionBar extends LinearLayout implements View.OnTouchListener {
         }
     }
 
-    public void setActionListener(OnActionListener actionListener) {
-        mActionListener = actionListener;
-    }
+    public static class JumpTask extends AsyncTask<Image, Void, Float> {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
 
-    public interface OnActionListener {
-        void onDrag(float dx, float dy);
+        @Override
+        protected Float doInBackground(Image... images) {
+            return null;
+        }
 
-        void onRemove();
-
+        @Override
+        protected void onPostExecute(Float aFloat) {
+            super.onPostExecute(aFloat);
+        }
     }
 }

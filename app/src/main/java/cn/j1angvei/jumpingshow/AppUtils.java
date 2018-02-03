@@ -2,7 +2,10 @@ package cn.j1angvei.jumpingshow;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Point;
 import android.provider.Settings;
+import android.util.DisplayMetrics;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 /**
@@ -28,7 +31,17 @@ public class AppUtils {
 
     public static void requestScreenCapturePermission(Context context) {
         Intent intent = new Intent(context, PermissionActivity.class);
-        intent.putExtra(PermissionActivity.EXTRA_REQUESTED_PERMISSION, PermissionActivity.Permission.SCREEN_CAPTURE);
+        intent.putExtra(PermissionActivity.EXTRA_PERMISSION, PermissionActivity.VALUE_SCREEN_CAPTURE);
         context.startActivity(intent);
+    }
+
+    public static int[] getScreenParams(Context context) {
+        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        DisplayMetrics metrics = new DisplayMetrics();
+        assert wm != null;
+        wm.getDefaultDisplay().getMetrics(metrics);
+        Point realSize = new Point();
+        wm.getDefaultDisplay().getRealSize(realSize);
+        return new int[]{realSize.x, realSize.y, metrics.densityDpi};
     }
 }

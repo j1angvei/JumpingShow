@@ -47,4 +47,5 @@ public class JSApplication extends Application {
         return mMediaProjection;
     }
 
+
 }

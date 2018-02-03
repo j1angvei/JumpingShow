@@ -20,42 +20,43 @@ import android.support.v7.app.AppCompatActivity;
 
 public class PermissionActivity extends AppCompatActivity {
 
-    public static final String EXTRA_REQUESTED_PERMISSION = "PermissionActivity.extra_requested_permission";
+    public static final String EXTRA_PERMISSION = "PermissionActivity.extra_permission";
+    public static final String VALUE_SCREEN_CAPTURE = "PermissionActivity.value_screen_capture";
+    public static final String VALUE_WRITE_STORAGE = "PermissionActivity.value_write_storage";
 
-    private static String[] STORAGE_PERMISSION = {Manifest.permission.WRITE_EXTERNAL_STORAGE};
-
-    private static final int REQUEST_STORAGE = 134;
+    private static final int REQUEST_WRITE_STORAGE = 134;
     private static final int REQUEST_SCREEN_CAPTURE = 145;
 
+    private static String[] STORAGE_PERMISSION = {Manifest.permission.WRITE_EXTERNAL_STORAGE};
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         Intent intent = getIntent();
-        if (intent.hasExtra(EXTRA_REQUESTED_PERMISSION)) {
-            Permission permission = (Permission) intent.getSerializableExtra(EXTRA_REQUESTED_PERMISSION);
-            requestPermission(permission);
+        if (intent.hasExtra(EXTRA_PERMISSION)) {
+            String value = intent.getStringExtra(EXTRA_PERMISSION);
+            requestPermission(value);
         } else {
             AppUtils.toast(this, "未指定需要申请的权限");
             onBackPressed();
         }
     }
 
-    private void requestPermission(Permission permission) {
-        switch (permission) {
-            case WRITE_STORAGE:
-                //检查是否已经授予存储权限
+    private void requestPermission(String value) {
+        switch (value) {
+            case VALUE_WRITE_STORAGE:
                 boolean alreadyGranted = PackageManager.PERMISSION_GRANTED ==
                         ContextCompat.checkSelfPermission(this, STORAGE_PERMISSION[0]);
                 if (!alreadyGranted) {
-                    ActivityCompat.requestPermissions(this, STORAGE_PERMISSION, REQUEST_STORAGE);
+                    ActivityCompat.requestPermissions(this, STORAGE_PERMISSION, REQUEST_WRITE_STORAGE);
                 } else {
                     AppUtils.toast(this, "已经授予存储权限");
                     setResult(RESULT_OK);
                     onBackPressed();
                 }
                 break;
-            case SCREEN_CAPTURE:
+
+            case VALUE_SCREEN_CAPTURE:
                 boolean granted = JSApplication.getInstance().getMediaProjection() != null;
                 if (granted) {
                     AppUtils.toast(this, "已经授予录屏权限");
@@ -67,10 +68,10 @@ public class PermissionActivity extends AppCompatActivity {
                     }
                 }
                 break;
-            case ACCESSIBILITY_SERVICE:
+
+            default:
                 break;
         }
-
     }
 
     @Override
@@ -89,7 +90,7 @@ public class PermissionActivity extends AppCompatActivity {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == REQUEST_STORAGE) {
+        if (requestCode == REQUEST_WRITE_STORAGE) {
             boolean granted = grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
             String hint = granted ? "授予存储权限" : "保存出错的处理结果需要存储权限";
             int result = granted ? RESULT_OK : RESULT_CANCELED;
@@ -99,11 +100,5 @@ public class PermissionActivity extends AppCompatActivity {
         } else {
             super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
-    }
-
-    public enum Permission {
-        WRITE_STORAGE,
-        SCREEN_CAPTURE,
-        ACCESSIBILITY_SERVICE
     }
 }
