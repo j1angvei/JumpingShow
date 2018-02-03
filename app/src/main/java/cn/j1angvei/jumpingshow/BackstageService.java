@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
-import android.util.Log;
+import android.media.projection.MediaProjection;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
@@ -35,12 +35,8 @@ public class BackstageService extends AccessibilityService {
     public void onAccessibilityEvent(AccessibilityEvent event) {
         int eventType = event.getEventType();
         AccessibilityNodeInfo rootNode = getRootInActiveWindow();
-        if (gameEntryVisible(eventType, rootNode)) {
-            try {
-                addActionBar();
-            } catch (Exception e) {
-                Log.e(TAG, "onAccessibilityEvent: ", e);
-            }
+        if (mShowMode == ActionBar.ShowMode.AUTOMATICALLY && gameEntryVisible(eventType, rootNode)) {
+            addActionBar();
         }
     }
 
@@ -98,7 +94,7 @@ public class BackstageService extends AccessibilityService {
     /**
      * 显示辅助动作栏
      */
-    private void addActionBar() throws Exception {
+    private void addActionBar() {
         if (mActionBar != null) {
             LogUtils.d("ActionBar already added");
             return;
@@ -146,33 +142,26 @@ public class BackstageService extends AccessibilityService {
     }
 
     private SharedPreferences.OnSharedPreferenceChangeListener initPreferenceChangeListener() {
-        return new SharedPreferences.OnSharedPreferenceChangeListener() {
-            @Override
-            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-                switch (key) {
-                    //主开关关闭时，移除动作栏
-                    case PrefsUtils.KEY_MAIN_SWITCH:
-                        if (!PrefsUtils.isMainSwitchOn(BackstageService.this)) {
-                            removeActionBar();
-                            break;
-                        }
-                        //主开关打开时，根据显示模式设置动作栏
-                    case PrefsUtils.KEY_ACTION_BAR_SHOW_MODE:
-                        mShowMode = PrefsUtils.getActionBarShowMode(BackstageService.this);
-                        if (mShowMode == ActionBar.ShowMode.MANUALLY) {
-                            try {
-                                addActionBar();
-                            } catch (Exception e) {
-                                Log.e(TAG, "onSharedPreferenceChanged: ", e);
-                            }
-                        } else {
-                            removeActionBar();
-                        }
+        return (sharedPreferences, key) -> {
+            switch (key) {
+                //主开关关闭时，移除动作栏
+                case PrefsUtils.KEY_MAIN_SWITCH:
+                    if (!PrefsUtils.isMainSwitchOn(BackstageService.this)) {
+                        removeActionBar();
                         break;
+                    }
+                    //主开关打开时，根据显示模式设置动作栏
+                case PrefsUtils.KEY_ACTION_BAR_SHOW_MODE:
+                    mShowMode = PrefsUtils.getActionBarShowMode(BackstageService.this);
+                    if (mShowMode == ActionBar.ShowMode.MANUALLY) {
+                        addActionBar();
+                    } else {
+                        removeActionBar();
+                    }
+                    break;
 
-                    default:
-                        break;
-                }
+                default:
+                    break;
             }
         };
     }

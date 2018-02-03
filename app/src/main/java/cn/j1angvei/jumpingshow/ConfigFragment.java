@@ -1,9 +1,7 @@
 package cn.j1angvei.jumpingshow;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
-import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 
@@ -28,11 +26,8 @@ public class ConfigFragment extends PreferenceFragment {
             boolean backstageReady = PrefsUtils.isBackstageReady(getContext());
 
             if (!backstageReady) {
-                Snackbar.make(getView(), "无障碍服务尚未打开", Snackbar.LENGTH_LONG)
-                        .setAction("去打开", v -> {
-                            Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
-                            getContext().startActivity(intent);
-                        }).show();
+                Snackbar.make(getView(), "开启无障碍服务才能使用辅助程序", Snackbar.LENGTH_LONG)
+                        .setAction("开启", v -> AppUtils.toAccessibility(getContext())).show();
             }
             return backstageReady;
         });

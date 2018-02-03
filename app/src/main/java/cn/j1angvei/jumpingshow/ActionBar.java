@@ -2,7 +2,7 @@ package cn.j1angvei.jumpingshow;
 
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.content.Intent;
+import android.media.projection.MediaProjection;
 import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.v4.view.ViewCompat;
@@ -31,6 +31,7 @@ public class ActionBar extends LinearLayout implements View.OnTouchListener {
     private ImageButton ibExit;
 
     private OnActionListener mActionListener;
+    private MediaProjection mMediaProjection;
 
     public ActionBar(Context context) {
         this(context, null);
@@ -54,10 +55,7 @@ public class ActionBar extends LinearLayout implements View.OnTouchListener {
     private void init() {
         inflate(getContext(), R.layout.action_bar, this);
 
-        setPadding(20, 20, 20, 20);
-        setOrientation(HORIZONTAL);
-//        setBackgroundColor(getResources().getColor(R.color.bg_action_bar));
-        setBackgroundResource(R.drawable.bg_action_bar);
+        mMediaProjection = JSApplication.getInstance().getMediaProjection();
 
         tbAuto = findViewById(R.id.tb_auto);
         ibJump = findViewById(R.id.ib_jump);
@@ -74,31 +72,53 @@ public class ActionBar extends LinearLayout implements View.OnTouchListener {
             public boolean onPreDraw() {
                 getViewTreeObserver().removeOnPreDrawListener(this);
                 ViewCompat.animate(tbAuto).alpha(1).setDuration(500);
-                ViewCompat.animate(ibJump).alpha(1).setStartDelay(100).setDuration(500);
-                ViewCompat.animate(ibConfig).alpha(1).setStartDelay(200).setDuration(500);
-                ViewCompat.animate(ibExit).alpha(1).setStartDelay(300).setDuration(500);
+                ViewCompat.animate(ibJump).alpha(1).setStartDelay(120).setDuration(500);
+                ViewCompat.animate(ibConfig).alpha(1).setStartDelay(240).setDuration(500);
+                ViewCompat.animate(ibExit).alpha(1).setStartDelay(360).setDuration(500);
                 return false;
             }
         });
 
-        //点击事件，跳转到设置
-        ibConfig.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getContext(), ConfigActivity.class);
-                getContext().startActivity(intent);
-            }
-        });
+        //设置内边距，方便拖曳
+        setPadding(20, 20, 20, 20);
+        setOrientation(HORIZONTAL);
+        postDelayed(() -> setBackgroundResource(R.drawable.bg_action_bar), 860);
 
+        //点击事件，跳转到设置
+        ibConfig.setOnClickListener(v -> AppUtils.toConfigs(getContext()));
         //点击事件，移除动作栏
         ibExit.setOnClickListener(v -> mActionListener.onRemove());
+
+        //点击事件，开始辅助跳跃
+        ibJump.setOnClickListener(v -> {
+            if (mMediaProjection == null) {
+                AppUtils.toast(getContext(), "录屏权限失效，重新申请");
+                AppUtils.requestScreenCapturePermission(getContext());
+                ibJump.setEnabled(false);
+                ibJump.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mMediaProjection = JSApplication.getInstance().getMediaProjection();
+                        ibJump.setEnabled(true);
+                    }
+                }, 3000);
+            } else {
+                jumpOnce();
+            }
+        });
 
         //实现拖曳事件
         setOnTouchListener(this);
 
+
     }
 
 
+    private void jumpOnce() {
+        AppUtils.toast(getContext(), "Jump");
+    }
+
+    //记录拖曳开始的上次坐标
     private float lastX, lastY;
 
     @Override
