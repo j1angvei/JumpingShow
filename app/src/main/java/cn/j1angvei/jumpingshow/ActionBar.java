@@ -55,7 +55,8 @@ public class ActionBar extends LinearLayout {
 
         setPadding(16, 16, 16, 16);
         setOrientation(HORIZONTAL);
-        setBackgroundColor(getResources().getColor(R.color.bg_action_bar));
+//        setBackgroundColor(getResources().getColor(R.color.bg_action_bar));
+        setBackgroundResource(R.drawable.bg_action_bar);
 
         tbAuto = findViewById(R.id.tb_auto);
         ibJump = findViewById(R.id.ib_jump);
@@ -71,10 +72,10 @@ public class ActionBar extends LinearLayout {
             @Override
             public boolean onPreDraw() {
                 getViewTreeObserver().removeOnPreDrawListener(this);
-                ViewCompat.animate(tbAuto).alpha(1).setStartDelay(100).setDuration(500);
-                ViewCompat.animate(ibJump).alpha(1).setStartDelay(200).setDuration(500);
-                ViewCompat.animate(ibConfig).alpha(1).setStartDelay(300).setDuration(500);
-                ViewCompat.animate(ibExit).alpha(1).setStartDelay(400).setDuration(500);
+                ViewCompat.animate(tbAuto).alpha(1).setDuration(500);
+                ViewCompat.animate(ibJump).alpha(1).setStartDelay(100).setDuration(500);
+                ViewCompat.animate(ibConfig).alpha(1).setStartDelay(200).setDuration(500);
+                ViewCompat.animate(ibExit).alpha(1).setStartDelay(300).setDuration(500);
                 return false;
             }
         });

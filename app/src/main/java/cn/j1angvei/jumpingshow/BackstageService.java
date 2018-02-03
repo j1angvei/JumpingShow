@@ -124,21 +124,27 @@ public class BackstageService extends AccessibilityService {
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
+                        v.setPressed(true);
                         initX = mLayoutParams.x;
                         initY = mLayoutParams.y;
                         initTouchX = event.getRawX();
                         initTouchY = event.getRawY();
-                        return true;
+                        break;
                     case MotionEvent.ACTION_MOVE:
                         mLayoutParams.x = initX + (int) (event.getRawX() - initTouchX);
                         mLayoutParams.y = initY + (int) (event.getRawY() - initTouchY);
                         mWindowManager.updateViewLayout(mActionBar, mLayoutParams);
-                        return true;
+                        break;
+                    case MotionEvent.ACTION_UP:
+                    case MotionEvent.ACTION_OUTSIDE:
+                    case MotionEvent.ACTION_CANCEL:
+                        v.setPressed(false);
+
+                        break;
                 }
-                return false;
+                return true;
             }
         });
-
         mWindowManager.addView(mActionBar, mLayoutParams);
 
         //回调函数，包括点击跳跃，拖曳窗口
