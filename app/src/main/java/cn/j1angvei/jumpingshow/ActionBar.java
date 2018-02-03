@@ -1,12 +1,14 @@
 package cn.j1angvei.jumpingshow;
 
-import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
+import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -17,7 +19,7 @@ import android.widget.ToggleButton;
  * @since 2018/2/1
  */
 
-public class ActionBar extends LinearLayout {
+public class ActionBar extends LinearLayout implements View.OnTouchListener {
     private static final String TAG = ActionBar.class.getSimpleName();
     //checked为true时，自动进行截屏、跳跃操作，否则为手动
     private ToggleButton tbAuto;
@@ -49,11 +51,10 @@ public class ActionBar extends LinearLayout {
         init();
     }
 
-    @SuppressLint("ClickableViewAccessibility")
     private void init() {
         inflate(getContext(), R.layout.action_bar, this);
 
-        setPadding(16, 16, 16, 16);
+        setPadding(20, 20, 20, 20);
         setOrientation(HORIZONTAL);
 //        setBackgroundColor(getResources().getColor(R.color.bg_action_bar));
         setBackgroundResource(R.drawable.bg_action_bar);
@@ -80,12 +81,48 @@ public class ActionBar extends LinearLayout {
             }
         });
 
+        //点击事件，跳转到设置
+        ibConfig.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getContext(), ConfigActivity.class);
+                getContext().startActivity(intent);
+            }
+        });
+
+        //点击事件，移除动作栏
+        ibExit.setOnClickListener(v -> mActionListener.onRemove());
+
+        //实现拖曳事件
+        setOnTouchListener(this);
 
     }
 
+
+    private float lastX, lastY;
+
     @Override
-    public boolean performClick() {
-        return super.performClick();
+    public boolean onTouch(View v, MotionEvent event) {
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                lastX = event.getRawX();
+                lastY = event.getRawY();
+                v.setPressed(true);
+                return true;
+            case MotionEvent.ACTION_MOVE:
+                float currentX = event.getRawX();
+                float currentY = event.getRawY();
+                mActionListener.onDrag(currentX - lastX, currentY - lastY);
+                lastX = currentX;
+                lastY = currentY;
+                return true;
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_OUTSIDE:
+            case MotionEvent.ACTION_CANCEL:
+                v.setPressed(false);
+                return true;
+        }
+        return false;
     }
 
     public enum ShowMode {
@@ -109,7 +146,9 @@ public class ActionBar extends LinearLayout {
     }
 
     public interface OnActionListener {
-        void onDragged(float dx, float dy);
+        void onDrag(float dx, float dy);
+
+        void onRemove();
 
     }
 }

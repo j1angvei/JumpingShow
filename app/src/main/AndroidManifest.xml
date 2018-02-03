@@ -11,7 +11,9 @@
         <activity
             android:name=".ActionActivity"
             android:theme="@style/AppTheme.Action" />
-        <activity android:name=".ConfigActivity">
+        <activity
+            android:name=".ConfigActivity"
+            android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

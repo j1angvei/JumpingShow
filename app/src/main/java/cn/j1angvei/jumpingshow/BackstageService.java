@@ -6,8 +6,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
 import android.util.Log;
-import android.view.MotionEvent;
-import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
@@ -63,7 +61,6 @@ public class BackstageService extends AccessibilityService {
 
     @Override
     public boolean onUnbind(Intent intent) {
-
         PrefsUtils.unregisterListener(this, mPreferenceChangeListener);
         mPreferenceChangeListener = null;
         removeActionBar();
@@ -110,51 +107,21 @@ public class BackstageService extends AccessibilityService {
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSLUCENT
         );
-
         mActionBar = new ActionBar(this);
-//        mActionBar.setOrientation(LinearLayout.HORIZONTAL);
-//        mActionBar.setPadding(16, 16, 16, 16);
-        mActionBar.setOnTouchListener(new View.OnTouchListener() {
-            //按下动作发生的时候，动作栏的坐标
-            private int initX, initY;
-            //按下动作所在的坐标
-            private float initTouchX, initTouchY;
-
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        v.setPressed(true);
-                        initX = mLayoutParams.x;
-                        initY = mLayoutParams.y;
-                        initTouchX = event.getRawX();
-                        initTouchY = event.getRawY();
-                        break;
-                    case MotionEvent.ACTION_MOVE:
-                        mLayoutParams.x = initX + (int) (event.getRawX() - initTouchX);
-                        mLayoutParams.y = initY + (int) (event.getRawY() - initTouchY);
-                        mWindowManager.updateViewLayout(mActionBar, mLayoutParams);
-                        break;
-                    case MotionEvent.ACTION_UP:
-                    case MotionEvent.ACTION_OUTSIDE:
-                    case MotionEvent.ACTION_CANCEL:
-                        v.setPressed(false);
-
-                        break;
-                }
-                return true;
-            }
-        });
         mWindowManager.addView(mActionBar, mLayoutParams);
 
         //回调函数，包括点击跳跃，拖曳窗口
         mActionListener = new ActionBar.OnActionListener() {
             @Override
-            public void onDragged(float dx, float dy) {
-                Log.d(TAG, "onDragged: " + dx + "\t" + dy);
+            public void onDrag(float dx, float dy) {
                 mLayoutParams.x += dx;
-                mLayoutParams.y -= dy;
+                mLayoutParams.y += dy;
                 mWindowManager.updateViewLayout(mActionBar, mLayoutParams);
+            }
+
+            @Override
+            public void onRemove() {
+                removeActionBar();
             }
         };
         mActionBar.setActionListener(mActionListener);
@@ -171,6 +138,7 @@ public class BackstageService extends AccessibilityService {
         }
         mWindowManager.removeView(mActionBar);
         mActionBar = null;
+        mActionListener = null;
     }
 
     private SharedPreferences.OnSharedPreferenceChangeListener initPreferenceChangeListener() {
