@@ -39,4 +39,5 @@ public class LogUtils {
         }
         return new String[]{tag, method};
     }
+
 }

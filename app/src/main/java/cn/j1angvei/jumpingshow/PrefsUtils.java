@@ -64,5 +64,15 @@ public class PrefsUtils {
         return read(context).getBoolean(KEY_MAIN_SWITCH, false);
     }
 
+    public static final String KEY_BACKSTAGE_READY = "backstage_ready";
+
+    public static boolean isBackstageReady(Context context) {
+        return read(context).getBoolean(KEY_BACKSTAGE_READY, false);
+    }
+
+    public static void setBackstageReady(Context context, boolean isReady) {
+        write(context).putBoolean(KEY_BACKSTAGE_READY, isReady).apply();
+    }
+
 }
 

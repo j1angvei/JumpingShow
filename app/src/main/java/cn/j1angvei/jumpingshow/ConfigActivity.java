@@ -20,6 +20,5 @@ public class ConfigActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getFragmentManager().beginTransaction().replace(android.R.id.content, new ConfigFragment()).commit();
-
     }
 }

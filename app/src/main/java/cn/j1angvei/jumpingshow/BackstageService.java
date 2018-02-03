@@ -52,6 +52,8 @@ public class BackstageService extends AccessibilityService {
     @Override
     protected void onServiceConnected() {
         super.onServiceConnected();
+        AppUtils.toast(this, "onServiceConnected");
+        PrefsUtils.setBackstageReady(this, true);
         mWindowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
 
         mShowMode = PrefsUtils.getActionBarShowMode(this);
@@ -61,6 +63,8 @@ public class BackstageService extends AccessibilityService {
 
     @Override
     public boolean onUnbind(Intent intent) {
+        AppUtils.toast(this, "onUnbind");
+        PrefsUtils.setBackstageReady(this, false);
         PrefsUtils.unregisterListener(this, mPreferenceChangeListener);
         mPreferenceChangeListener = null;
         removeActionBar();
