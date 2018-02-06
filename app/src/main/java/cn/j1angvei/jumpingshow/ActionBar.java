@@ -21,6 +21,13 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ToggleButton;
 
+import org.opencv.core.Core;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.core.Point;
+import org.opencv.core.Size;
+import org.opencv.imgproc.Imgproc;
+
 /**
  * @author j1angvei
  * @since 2018/2/1
@@ -49,8 +56,24 @@ public class ActionBar extends LinearLayout {
      * true表示已经得到一张截图
      */
     private boolean mScreenshotTaken;
-
     private VirtualDisplay mVirtualDisplay;
+
+    /**
+     * 表示屏幕中跳动的小人
+     */
+    private Mat mJumper;
+
+    /**
+     * 表示小人下一个着陆的地方
+     */
+    private Mat mStone;
+
+    /**
+     * 表示整个屏幕
+     */
+    private Mat mScreen;
+
+    private JumpParams mJumpParams;
 
     public ActionBar(Context context) {
         this(context, null);
@@ -100,7 +123,8 @@ public class ActionBar extends LinearLayout {
                 if (mScreenshotTaken) {
                     return;
                 }
-                reader.acquireLatestImage();
+                Image image = reader.acquireLatestImage();
+                new JumpTask(mJumper, mJumpParams).execute(image);
 
             }
         }, null);
@@ -190,6 +214,15 @@ public class ActionBar extends LinearLayout {
         setPadding(20, 20, 20, 20);
         setOrientation(HORIZONTAL);
         postDelayed(() -> setBackgroundResource(R.drawable.bg_action_bar), 860);
+
+
+        //初始化OpenCV的数据
+        Mat jumperMat = ImageUtils.assetToMat(getContext(), "i_white.png");
+        float scaleRatio = PrefsUtils.getScaleRatio(getContext());
+        Size originalSize = jumperMat.size();
+        Size scaledSize = new Size(originalSize.width * scaleRatio, originalSize.height * scaleRatio);
+        Imgproc.resize(jumperMat, mJumper, scaledSize);
+
     }
 
     /**
@@ -214,6 +247,10 @@ public class ActionBar extends LinearLayout {
 
     }
 
+    /**
+     * 显示辅助动作栏的方式，
+     * 手动打开，点击通知打开，不显示通知
+     */
     public enum ShowMode {
         MANUALLY(R.string.action_bar_show_manually),
         AUTOMATICALLY(R.string.action_bar_show_automatically),
@@ -230,7 +267,45 @@ public class ActionBar extends LinearLayout {
         }
     }
 
-    public static class JumpTask extends AsyncTask<Image, Void, Float> {
+    private static final class JumpParams {
+        /**
+         * 跳高者的身高比例，原图中的宽高比为66*178
+         */
+        public final float scalingRatio;
+        /**
+         * 跳高者在3D世界中，其底部中间的点在2D图片中的位置百分比
+         */
+        private final float bottomCenterPercentage;
+
+        /**
+         * 游戏界面存在的三角形，水平边长度设为1，该值表示竖直边的长度
+         */
+        public final float triangleVerticalEdge;
+
+        /**
+         * 游戏界面存在的三角形，水平边长度设为1.该值表示斜边的长度
+         */
+        public final float triangleBevelEdge;
+
+        public JumpParams(float scalingRatio, float bottomCenterPercentage,
+                          float triangleVerticalEdge, float triangleBevelEdge) {
+            this.scalingRatio = scalingRatio;
+            this.bottomCenterPercentage = bottomCenterPercentage;
+            this.triangleVerticalEdge = triangleVerticalEdge;
+            this.triangleBevelEdge = triangleBevelEdge;
+        }
+    }
+
+
+    private static class JumpTask extends AsyncTask<Image, Void, Float> {
+        private Mat jumper;
+        private JumpParams params;
+
+        public JumpTask(Mat jumper, JumpParams params) {
+            this.jumper = jumper;
+            this.params = params;
+        }
+
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
@@ -238,12 +313,72 @@ public class ActionBar extends LinearLayout {
 
         @Override
         protected Float doInBackground(Image... images) {
+            //屏幕截图的mat
+            Mat screen = ImageUtils.imageToMat(images[0]);
+
+            //小人儿的坐上角在屏幕中的坐标
+            Point topLeftOfJumper = matchJumper(screen, jumper);
+
+            //小人儿的底部重心在屏幕中的坐标
+            Point bottomCenterOfJumper = new Point(
+                    topLeftOfJumper.x + jumper.cols() / 2,
+                    topLeftOfJumper.y + jumper.rows() * params.bottomCenterPercentage);
+
+            //下一个跳跃点的位置的mat
+            Mat stone = calculateNextStone(screen, jumper, bottomCenterOfJumper, topLeftOfJumper);
+
             return null;
         }
 
         @Override
         protected void onPostExecute(Float aFloat) {
             super.onPostExecute(aFloat);
+        }
+
+        /**
+         * 使用模板匹配寻找屏幕截图中跳瓶的左上角的坐标
+         *
+         * @param screen 屏幕的mat
+         * @param jumper 小人儿的mat
+         * @return 匹配完成后，小人儿的左上角在屏幕中的坐标
+         */
+        private Point matchJumper(Mat screen, Mat jumper) {
+            Mat matchMat = new Mat();
+            matchMat.create(
+                    screen.cols() - jumper.cols() + 1,
+                    screen.rows() - jumper.rows() + 1,
+                    CvType.CV_32FC1
+            );
+            Imgproc.matchTemplate(screen, jumper, matchMat, Imgproc.TM_CCOEFF_NORMED);
+            Core.normalize(matchMat, matchMat, 0, 1, Core.NORM_MINMAX, -1, new Mat());
+            Core.MinMaxLocResult minMaxLocResult = Core.minMaxLoc(matchMat);
+            Point topLeftPoint = minMaxLocResult.maxLoc;
+
+            return topLeftPoint;
+
+        }
+
+        private Mat calculateNextStone(Mat screen, Mat jumper, Point bottomCenterOfJumper, Point topLeftOfJumper) {
+
+
+            //小人儿是在左半边屏幕还是右半边屏幕
+            boolean isInLeftScreen = bottomCenterOfJumper.x * 2 < screen.cols();
+
+            //下一个落脚点（石头）的粗略区域
+            //石头的下边界，与小人儿的底部相同
+            int stoneBottom = (int) (topLeftOfJumper.y + jumper.rows());
+            //石头的左边界，小人儿右边或者屏幕左边（为0）
+            int stoneLeft = isInLeftScreen ?
+                    (int) (topLeftOfJumper.x + jumper.cols()) : 0;
+            //石头的上边界，满足游戏中的三角形关系
+            int stoneTop = (int) (params.triangleVerticalEdge *
+                    Math.max(stoneLeft, screen.cols() - stoneLeft));
+            //石头的右边界，小人儿的左边或者屏幕右边
+            int stoneColEnd = isInLeftScreen ?
+                    (int) topLeftOfJumper.x : screen.cols();
+            //下一个落脚点的粗略区域的mat
+            Mat stone = screen.submat(stoneTop, stoneBottom, stoneLeft, stoneColEnd);
+            return stone;
         }
     }
 }

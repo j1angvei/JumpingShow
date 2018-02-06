@@ -74,5 +74,17 @@ public class PrefsUtils {
         write(context).putBoolean(KEY_BACKSTAGE_READY, isReady).apply();
     }
 
+    public static final String KEY_SCALE_RATIO = "bottle_scale_ratio";
+
+    public static float getScaleRatio(Context context) {
+        return read(context).getFloat(KEY_SCALE_RATIO, 1.0f);
+    }
+
+    public static final String KEY_BOTTOM_CENTER_3D = "bottom_center_3d";
+
+    public static final float getBottomCenterRatio(Context context) {
+        return read(context).getFloat(KEY_BOTTOM_CENTER_3D, 0.910112f);
+    }
+
 }
 
