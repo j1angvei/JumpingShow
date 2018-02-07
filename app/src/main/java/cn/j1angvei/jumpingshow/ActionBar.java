@@ -15,7 +15,6 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
-import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ToggleButton;
@@ -103,9 +102,10 @@ public class ActionBar extends LinearLayout {
 
                 if (!mInProcess || mScreenshotTaken) {
                     image.close();
+                    Log.d(TAG, "image available: not in process or already taken screenshot");
                 } else {
                     mScreenshotTaken = true;
-                    new JumpTask(mJumper,mJumpParams,mJumpListener).execute(image);
+                    new JumpTask(mJumper, mJumpParams, mJumpListener).execute(image);
                 }
             } catch (Exception e) {
                 Log.e(TAG, "initArgs: image available listener", e);
@@ -137,8 +137,19 @@ public class ActionBar extends LinearLayout {
                 postDelayed(() -> setEnabled(true), pressDuration);
                 mActionListener.onJump(pressPosition, pressDuration);
 
+                if (mVirtualDisplay != null) {
+
+                    mVirtualDisplay.release();
+                    mVirtualDisplay = null;
+                }
+
                 mInProcess = false;
                 mScreenshotTaken = false;
+
+                if (tbAuto.isChecked()) {
+                    postDelayed(() -> ibJump.performClick(), pressDuration * 2);
+
+                }
             }
         };
     }
@@ -191,13 +202,9 @@ public class ActionBar extends LinearLayout {
                 }
                 if (mMediaProjection != null) {
                     mMediaProjection.stop();
+                    mMediaProjection = null;
                 }
-                WindowManager windowManager = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
-                if (windowManager != null) {
-                    windowManager.removeView(ActionBar.this);
-                }
-
-                mActionListener.onRemoved();
+                mActionListener.onRemoveBar();
             }
         });
         //开始辅助跳跃
@@ -241,7 +248,7 @@ public class ActionBar extends LinearLayout {
                     case MotionEvent.ACTION_MOVE:
                         float currentX = event.getRawX();
                         float currentY = event.getRawY();
-                        mActionListener.onDragged(currentX - lastX, currentY - lastY);
+                        mActionListener.onDragBar(currentX - lastX, currentY - lastY);
                         lastX = currentX;
                         lastY = currentY;
                         return true;
@@ -261,9 +268,9 @@ public class ActionBar extends LinearLayout {
     }
 
     public interface OnActionListener {
-        void onDragged(float dx, float dy);
+        void onDragBar(float dx, float dy);
 
-        void onRemoved();
+        void onRemoveBar();
 
         void onJump(Point pressPosition, int pressDuration);
 
