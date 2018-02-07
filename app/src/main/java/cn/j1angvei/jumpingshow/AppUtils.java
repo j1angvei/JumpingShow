@@ -44,4 +44,22 @@ public class AppUtils {
         wm.getDefaultDisplay().getRealSize(realSize);
         return new int[]{realSize.x, realSize.y, metrics.densityDpi};
     }
+
+    /**
+     * todo 待续
+     *
+     * @param context
+     * @return
+     */
+    public static JumpParams getJumpParams(Context context) {
+        return new JumpParams(
+                PrefsUtils.getScalingRatio(context),
+                PrefsUtils.getBottomCenterPercentage(context),
+                PrefsUtils.getTriangleVerticalRatio(context),
+                PrefsUtils.getTriangleBevelRatio(context),
+                PrefsUtils.getCannyLowerThreshold(context),
+                PrefsUtils.getCannyUpperThreshold(context),
+                PrefsUtils.getJumpFactor(context)
+        );
+    }
 }

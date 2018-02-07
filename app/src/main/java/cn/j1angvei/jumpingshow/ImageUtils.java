@@ -4,15 +4,12 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.Image;
-import android.os.Environment;
+import android.util.Log;
 
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
-import org.opencv.core.Scalar;
-import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -23,18 +20,19 @@ import java.nio.ByteBuffer;
  */
 
 public class ImageUtils {
+    private static final String TAG = ImageUtils.class.getSimpleName();
 
-    public static Bitmap assetToBitmap(Context context, String assetPath) {
+    private static Bitmap assetToBitmap(Context context, String assetPath) {
         InputStream inputStream = null;
         try {
             inputStream = context.getAssets().open(assetPath);
         } catch (IOException e) {
-            LogUtils.e("fail to read asset", e);
+            Log.e(TAG, "fail to read asset", e);
         }
         return BitmapFactory.decodeStream(inputStream);
     }
 
-    public static Bitmap imageToBitmap(Image image) {
+    private static Bitmap imageToBitmap(Image image) {
 
         int width = image.getWidth();
         int height = image.getHeight();
@@ -53,11 +51,16 @@ public class ImageUtils {
         return Bitmap.createBitmap(bitmap, 0, 0, width, height);
     }
 
-    public static Mat bitmapToMat(Bitmap bitmap) {
+    private static Mat bitmapToMat(Bitmap bitmap) {
         Mat mat = new Mat();
-        Utils.bitmapToMat(bitmap, mat);
-        //Android Bitmap中的颜色channel为BGR，需要转换为RGB
-        Imgproc.cvtColor(mat, mat, Imgproc.COLOR_BGR2RGB);
+        try {
+
+            Utils.bitmapToMat(bitmap, mat);
+            //Android Bitmap中的颜色channel为BGR，需要转换为RGB
+            Imgproc.cvtColor(mat, mat, Imgproc.COLOR_BGR2RGB);
+        } catch (Exception e) {
+            Log.e(TAG, "bitmapToMat: fail to convert bitmap to mat ", e);
+        }
         return mat;
     }
 
@@ -71,22 +74,4 @@ public class ImageUtils {
         Bitmap bitmap = imageToBitmap(image);
         return bitmapToMat(bitmap);
     }
-
-    private static final String DIR = Environment.getExternalStorageDirectory().getPath() + "/jumpingshow/";
-
-    static {
-        File file = new File(DIR);
-        if (!file.exists()) {
-            file.mkdir();
-        }
-    }
-
-    public static void saveMatAsPicture(String baseName, Mat mat) {
-        Imgcodecs.imwrite(DIR + baseName, mat);
-    }
-
-    public static final Scalar RED = new Scalar(54, 67, 244);
-    public static final Scalar PURPLE = new Scalar(176, 39, 156);
-    public static final Scalar BLUE = new Scalar(243, 150, 33);
-    public static final Scalar WHITE = new Scalar(255, 255, 255);
 }

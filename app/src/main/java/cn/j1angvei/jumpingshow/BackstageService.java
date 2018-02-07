@@ -1,17 +1,23 @@
 package cn.j1angvei.jumpingshow;
 
 import android.accessibilityservice.AccessibilityService;
+import android.accessibilityservice.GestureDescription;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Path;
 import android.graphics.PixelFormat;
-import android.media.projection.MediaProjection;
+import android.graphics.Point;
+import android.util.Log;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
+import org.opencv.android.OpenCVLoader;
+
 import java.util.List;
+import java.util.Random;
 
 /**
  * @author j1angvei
@@ -36,7 +42,11 @@ public class BackstageService extends AccessibilityService {
         int eventType = event.getEventType();
         AccessibilityNodeInfo rootNode = getRootInActiveWindow();
         if (mShowMode == ActionBar.ShowMode.AUTOMATICALLY && gameEntryVisible(eventType, rootNode)) {
-            addActionBar();
+            try {
+                addActionBar();
+            } catch (Exception e) {
+                Log.e(TAG, "onAccessibilityEvent: ",e );
+            }
         }
     }
 
@@ -49,6 +59,12 @@ public class BackstageService extends AccessibilityService {
     protected void onServiceConnected() {
         super.onServiceConnected();
         AppUtils.toast(this, "onServiceConnected");
+        try {
+            OpenCVLoader.initDebug();
+            Log.d(TAG, "onServiceConnected: init OpenCV success!");
+        } catch (Exception e) {
+            Log.e(TAG, "onServiceConnected: fail to load openCV libs", e);
+        }
         PrefsUtils.setBackstageReady(this, true);
         mWindowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
 
@@ -63,7 +79,11 @@ public class BackstageService extends AccessibilityService {
         PrefsUtils.setBackstageReady(this, false);
         PrefsUtils.unregisterListener(this, mPreferenceChangeListener);
         mPreferenceChangeListener = null;
-        removeActionBar();
+        try {
+            removeActionBar();
+        } catch (Exception e) {
+            Log.e(TAG, "onUnbind: ",e );
+        }
         return super.onUnbind(intent);
     }
 
@@ -94,9 +114,9 @@ public class BackstageService extends AccessibilityService {
     /**
      * 显示辅助动作栏
      */
-    private void addActionBar() {
+    private void addActionBar() throws Exception{
         if (mActionBar != null) {
-            LogUtils.d("ActionBar already added");
+            Log.d(TAG, "ActionBar already added");
             return;
         }
 
@@ -107,22 +127,49 @@ public class BackstageService extends AccessibilityService {
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSLUCENT
         );
+        mLayoutParams.verticalMargin=0.15f;
+
         mActionBar = new ActionBar(this);
         mWindowManager.addView(mActionBar, mLayoutParams);
 
         //回调函数，包括点击跳跃，拖曳窗口
         mActionListener = new ActionBar.OnActionListener() {
             @Override
-            public void onDrag(float dx, float dy) {
+            public void onDragged(float dx, float dy) {
                 mLayoutParams.x += dx;
                 mLayoutParams.y += dy;
                 mWindowManager.updateViewLayout(mActionBar, mLayoutParams);
             }
 
             @Override
-            public void onRemove() {
-                removeActionBar();
+            public void onRemoved() {
+                try {
+                    removeActionBar();
+                } catch (Exception e) {
+                    Log.e(TAG, "onRemoved: ",e );
+                }
             }
+
+            @Override
+            public void onJump(Point pressPosition, int pressDuration) {
+                float x = pressPosition.x;
+                float y = pressPosition.y;
+                Path pressPath = new Path();
+                pressPath.moveTo(x, y);
+                pressPath.lineTo(x + new Random().nextInt(10), y + new Random().nextInt(10));
+                GestureDescription.Builder builder = new GestureDescription.Builder();
+                builder.addStroke(new GestureDescription.StrokeDescription(pressPath, 100, pressDuration));
+                Log.d(TAG, "onJump: Start jump");
+                dispatchGesture(builder.build(), new GestureResultCallback() {
+                    @Override
+                    public void onCompleted(GestureDescription gestureDescription) {
+                        Log.d(TAG, "onCompleted: gesture");
+                        super.onCompleted(gestureDescription);
+                    }
+                }, null);
+            }
+
+
         };
         mActionBar.setActionListener(mActionListener);
 
@@ -131,12 +178,12 @@ public class BackstageService extends AccessibilityService {
     /**
      * 移除辅助动作栏
      */
-    private void removeActionBar() {
+    private void removeActionBar() throws Exception{
         if (mActionBar == null) {
-            LogUtils.d("ActionBar already removed");
+            Log.d(TAG, "ActionBar already removed");
             return;
         }
-        mWindowManager.removeView(mActionBar);
+//        mWindowManager.removeView(mActionBar);
         mActionBar = null;
         mActionListener = null;
     }
@@ -147,16 +194,29 @@ public class BackstageService extends AccessibilityService {
                 //主开关关闭时，移除动作栏
                 case PrefsUtils.KEY_MAIN_SWITCH:
                     if (!PrefsUtils.isMainSwitchOn(BackstageService.this)) {
-                        removeActionBar();
+
+                        try {
+                            removeActionBar();
+                        } catch (Exception e) {
+                            Log.e(TAG, "initPreferenceChangeListener: ",e );
+                        }
                         break;
                     }
                     //主开关打开时，根据显示模式设置动作栏
                 case PrefsUtils.KEY_ACTION_BAR_SHOW_MODE:
                     mShowMode = PrefsUtils.getActionBarShowMode(BackstageService.this);
                     if (mShowMode == ActionBar.ShowMode.MANUALLY) {
-                        addActionBar();
+                        try {
+                            addActionBar();
+                        } catch (Exception e) {
+                            Log.e(TAG, "initPreferenceChangeListener: ",e );
+                        }
                     } else {
-                        removeActionBar();
+                        try {
+                            removeActionBar();
+                        } catch (Exception e) {
+                            Log.e(TAG, "initPreferenceChangeListener: ",e );
+                        }
                     }
                     break;
 

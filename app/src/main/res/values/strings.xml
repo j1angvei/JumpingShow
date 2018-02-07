@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">JumpingShow</string>
+    <string name="app_name">跳跳秀</string>
     <!--辅助操作栏显示方式-->
     <string name="action_bar_show_manually">手动打开辅助</string>
     <string name="action_bar_show_automatically">通知打开辅助</string>
