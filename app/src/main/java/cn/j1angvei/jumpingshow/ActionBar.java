@@ -32,8 +32,6 @@ import org.opencv.imgproc.Imgproc;
 public class ActionBar extends LinearLayout {
     private static final String TAG = ActionBar.class.getSimpleName();
 
-    private static final Object LOCK = new Object();
-
     private ToggleButton tbAuto;
     private ImageButton ibJump;
     private ImageButton ibConfig;
@@ -55,7 +53,9 @@ public class ActionBar extends LinearLayout {
     private boolean mScreenshotTaken;
     private VirtualDisplay mVirtualDisplay;
     private Mat mJumper = new Mat();
-    private JumpTask mJumpTask;
+
+    private JumpParams mJumpParams;
+    private JumpListener mJumpListener;
 
     public ActionBar(Context context) {
         this(context, null);
@@ -67,14 +67,12 @@ public class ActionBar extends LinearLayout {
 
     public ActionBar(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init();
+        try {
+            init();
+        } catch (Exception e) {
+            Log.e(TAG, "ActionBar: init", e);
+        }
     }
-
-//    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-//    public ActionBar(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-//        super(context, attrs, defStyleAttr, defStyleRes);
-//        init();
-//    }
 
     private void init() {
         //初始化参数，成员变量等
@@ -91,20 +89,28 @@ public class ActionBar extends LinearLayout {
         mWidth = screenParams[0];
         mHeight = screenParams[1];
         mDpi = screenParams[2];
+
         mImageReader = ImageReader.newInstance(mWidth, mHeight, PixelFormat.RGBA_8888, 2);
         mImageReader.setOnImageAvailableListener(reader -> {
-            Log.d(TAG, "initArgs: image available");
-            //不在处理图片过程，不做任何处理
-            if (!mInProcess) {
-                return;
+            Log.d(TAG, String.format("image available: inProcess, %s; screenshotTaken, %s.", mInProcess, mScreenshotTaken));
+
+            try {
+                Image image = reader.acquireLatestImage();
+                if (image == null) {
+                    Log.d(TAG, "initArgs: acquired image is null");
+                    return;
+                }
+
+                if (!mInProcess || mScreenshotTaken) {
+                    image.close();
+                } else {
+                    mScreenshotTaken = true;
+                    new JumpTask(mJumper,mJumpParams,mJumpListener).execute(image);
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "initArgs: image available listener", e);
             }
-            //已经得到一张截图，不再继续获取截图
-            if (mScreenshotTaken) {
-                return;
-            }
-            Image image = reader.acquireLatestImage();
-            mScreenshotTaken = true;
-            mJumpTask.execute(image);
+
 
         }, null);
 
@@ -115,8 +121,8 @@ public class ActionBar extends LinearLayout {
         Size scaledSize = new Size(originalSize.width * scaleRatio, originalSize.height * scaleRatio);
         Imgproc.resize(jumperMat, mJumper, scaledSize);
 
-        JumpParams jumpParams = AppUtils.getJumpParams(getContext());
-        JumpListener jumpListener = new JumpListener() {
+        mJumpParams = AppUtils.getJumpParams(getContext());
+        mJumpListener = new JumpListener() {
             @Override
             public void onInit() {
                 Log.d(TAG, "onInit: ");
@@ -130,13 +136,13 @@ public class ActionBar extends LinearLayout {
                 setEnabled(false);
                 postDelayed(() -> setEnabled(true), pressDuration);
                 mActionListener.onJump(pressPosition, pressDuration);
-                mVirtualDisplay.release();
+
                 mInProcess = false;
                 mScreenshotTaken = false;
             }
         };
-        mJumpTask = new JumpTask(mJumper, jumpParams, jumpListener);
     }
+
 
     private void initUI() {
         inflate(getContext(), R.layout.action_bar, this);
@@ -186,8 +192,8 @@ public class ActionBar extends LinearLayout {
                 if (mMediaProjection != null) {
                     mMediaProjection.stop();
                 }
-                WindowManager windowManager= (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
-                if (windowManager!=null){
+                WindowManager windowManager = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
+                if (windowManager != null) {
                     windowManager.removeView(ActionBar.this);
                 }
 
@@ -197,20 +203,25 @@ public class ActionBar extends LinearLayout {
         //开始辅助跳跃
         ibJump.setOnClickListener(v -> {
             //录屏权限需要重新申请
-            if (mMediaProjection == null) {
-                AppUtils.toast(getContext(), "录屏权限失效，重新申请");
-                AppUtils.requestScreenCapturePermission(getContext());
-                postDelayed(() -> mMediaProjection = JSApplication.getInstance().getMediaProjection(), 2000);
+            try {
+                if (mMediaProjection == null) {
+                    AppUtils.toast(getContext(), "录屏权限失效，重新申请");
+                    AppUtils.requestScreenCapturePermission(getContext());
+                    postDelayed(() -> mMediaProjection = JSApplication.getInstance().getMediaProjection(), 2000);
 
-            } else {
-                //录屏权限满足，可以截图
-                Log.d(TAG, "initListeners: pressed jump button ");
-                mInProcess = true;
-//                ibJump.setEnabled(false);
-                mVirtualDisplay = mMediaProjection.createVirtualDisplay("screen-capture",
-                        mWidth, mHeight, mDpi, DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
-                        mImageReader.getSurface(), null, null
-                );
+                } else {
+                    //录屏权限满足，可以截图
+                    Log.d(TAG, "initListeners: pressed jump button ");
+                    mInProcess = true;
+                    if (mVirtualDisplay == null) {
+                        mVirtualDisplay = mMediaProjection.createVirtualDisplay("screen-capture",
+                                mWidth, mHeight, mDpi, DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
+                                mImageReader.getSurface(), null, null
+                        );
+                    }
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "initListeners: ", e);
             }
         });
 

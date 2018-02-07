@@ -45,7 +45,7 @@ public class BackstageService extends AccessibilityService {
             try {
                 addActionBar();
             } catch (Exception e) {
-                Log.e(TAG, "onAccessibilityEvent: ",e );
+                Log.e(TAG, "onAccessibilityEvent: ", e);
             }
         }
     }
@@ -82,7 +82,7 @@ public class BackstageService extends AccessibilityService {
         try {
             removeActionBar();
         } catch (Exception e) {
-            Log.e(TAG, "onUnbind: ",e );
+            Log.e(TAG, "onUnbind: ", e);
         }
         return super.onUnbind(intent);
     }
@@ -114,7 +114,7 @@ public class BackstageService extends AccessibilityService {
     /**
      * 显示辅助动作栏
      */
-    private void addActionBar() throws Exception{
+    private void addActionBar() throws Exception {
         if (mActionBar != null) {
             Log.d(TAG, "ActionBar already added");
             return;
@@ -127,7 +127,7 @@ public class BackstageService extends AccessibilityService {
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSLUCENT
         );
-        mLayoutParams.verticalMargin=0.15f;
+        mLayoutParams.verticalMargin = 0.15f;
 
         mActionBar = new ActionBar(this);
         mWindowManager.addView(mActionBar, mLayoutParams);
@@ -146,7 +146,7 @@ public class BackstageService extends AccessibilityService {
                 try {
                     removeActionBar();
                 } catch (Exception e) {
-                    Log.e(TAG, "onRemoved: ",e );
+                    Log.e(TAG, "onRemoved: ", e);
                 }
             }
 
@@ -160,13 +160,19 @@ public class BackstageService extends AccessibilityService {
                 GestureDescription.Builder builder = new GestureDescription.Builder();
                 builder.addStroke(new GestureDescription.StrokeDescription(pressPath, 100, pressDuration));
                 Log.d(TAG, "onJump: Start jump");
-                dispatchGesture(builder.build(), new GestureResultCallback() {
-                    @Override
-                    public void onCompleted(GestureDescription gestureDescription) {
-                        Log.d(TAG, "onCompleted: gesture");
-                        super.onCompleted(gestureDescription);
-                    }
-                }, null);
+                try {
+
+                    dispatchGesture(builder.build(), new GestureResultCallback() {
+                        @Override
+                        public void onCompleted(GestureDescription gestureDescription) {
+                            Log.d(TAG, "onCompleted: gesture");
+                            super.onCompleted(gestureDescription);
+                        }
+                    }, null);
+
+                } catch (Exception e) {
+                    Log.e(TAG, "onJump: gesture  ", e);
+                }
             }
 
 
@@ -178,7 +184,7 @@ public class BackstageService extends AccessibilityService {
     /**
      * 移除辅助动作栏
      */
-    private void removeActionBar() throws Exception{
+    private void removeActionBar() throws Exception {
         if (mActionBar == null) {
             Log.d(TAG, "ActionBar already removed");
             return;
@@ -198,7 +204,7 @@ public class BackstageService extends AccessibilityService {
                         try {
                             removeActionBar();
                         } catch (Exception e) {
-                            Log.e(TAG, "initPreferenceChangeListener: ",e );
+                            Log.e(TAG, "initPreferenceChangeListener: ", e);
                         }
                         break;
                     }
@@ -209,13 +215,13 @@ public class BackstageService extends AccessibilityService {
                         try {
                             addActionBar();
                         } catch (Exception e) {
-                            Log.e(TAG, "initPreferenceChangeListener: ",e );
+                            Log.e(TAG, "initPreferenceChangeListener: ", e);
                         }
                     } else {
                         try {
                             removeActionBar();
                         } catch (Exception e) {
-                            Log.e(TAG, "initPreferenceChangeListener: ",e );
+                            Log.e(TAG, "initPreferenceChangeListener: ", e);
                         }
                     }
                     break;

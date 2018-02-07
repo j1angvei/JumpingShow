@@ -1,5 +1,6 @@
 package cn.j1angvei.jumpingshow;
 
+import android.graphics.ImageFormat;
 import android.graphics.Point;
 import android.media.Image;
 import android.os.AsyncTask;
@@ -20,7 +21,6 @@ public class JumpTask extends AsyncTask<Image, Void, Integer> {
     private Mat mJumper;
     private JumpParams mParams;
     private JumpListener mJumpListener;
-    private Image mImage;
     private Point pressPosition;
 
     public JumpTask(Mat jumper, JumpParams params, JumpListener jumpListener) {
@@ -37,9 +37,9 @@ public class JumpTask extends AsyncTask<Image, Void, Integer> {
 
     @Override
     protected Integer doInBackground(Image... images) {
-        mImage = images[0];
         //屏幕截图的mat
-        Mat screen = ImageUtils.imageToMat(mImage);
+        Mat screen = ImageUtils.imageToMat(images[0]);
+        images[0].close();
 
         //小人儿的坐上角在屏幕中的坐标
         Point topLeftOfJumper = matchJumper(screen, mJumper);
@@ -62,9 +62,6 @@ public class JumpTask extends AsyncTask<Image, Void, Integer> {
     @Override
     protected void onPostExecute(Integer pressDuration) {
         super.onPostExecute(pressDuration);
-        if (mImage != null) {
-            mImage.close();
-        }
         mJumpListener.onReady(pressPosition, pressDuration);
     }
 

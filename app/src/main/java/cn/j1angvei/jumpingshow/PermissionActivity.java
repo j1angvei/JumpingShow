@@ -80,9 +80,7 @@ public class PermissionActivity extends AppCompatActivity {
             JSApplication.getInstance().setProjectionData(resultCode,data);
             boolean granted = resultCode == RESULT_OK;
             String hint = granted ? "已经授予录屏权限" : "授权失败，无法进行屏幕截图";
-            int result = granted ? RESULT_OK : RESULT_CANCELED;
             AppUtils.toast(this, hint);
-            setResult(result);
             onBackPressed();
         }
         super.onActivityResult(requestCode, resultCode, data);
@@ -92,10 +90,8 @@ public class PermissionActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == REQUEST_WRITE_STORAGE) {
             boolean granted = grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
-            String hint = granted ? "授予存储权限" : "保存出错的处理结果需要存储权限";
-            int result = granted ? RESULT_OK : RESULT_CANCELED;
+            String hint = granted ? "已经授予存储权限" : "保存出错的处理结果需要存储权限";
             AppUtils.toast(this, hint);
-            setResult(result);
             onBackPressed();
         } else {
             super.onRequestPermissionsResult(requestCode, permissions, grantResults);
