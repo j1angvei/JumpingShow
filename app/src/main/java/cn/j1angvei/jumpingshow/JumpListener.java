@@ -14,7 +14,6 @@ public interface JumpListener {
     void onInit();
 
     /**
-     *
      * @param pressDuration
      */
     void onReady(Point pressPosition, int pressDuration);

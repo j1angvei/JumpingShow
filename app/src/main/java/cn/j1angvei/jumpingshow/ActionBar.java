@@ -23,6 +23,8 @@ import org.opencv.core.Mat;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
+import java.util.Random;
+
 /**
  * @author j1angvei
  * @since 2018/2/1
@@ -91,7 +93,6 @@ public class ActionBar extends LinearLayout {
 
         mImageReader = ImageReader.newInstance(mWidth, mHeight, PixelFormat.RGBA_8888, 2);
         mImageReader.setOnImageAvailableListener(reader -> {
-            Log.d(TAG, String.format("image available: inProcess, %s; screenshotTaken, %s.", mInProcess, mScreenshotTaken));
 
             try {
                 Image image = reader.acquireLatestImage();
@@ -102,9 +103,12 @@ public class ActionBar extends LinearLayout {
 
                 if (!mInProcess || mScreenshotTaken) {
                     image.close();
-                    Log.d(TAG, "image available: not in process or already taken screenshot");
+                    Log.d(TAG, String.format("image available: inProcess, %s; screenshotTaken, %s.", mInProcess, mScreenshotTaken));
+
                 } else {
+                    Log.d(TAG, "initArgs: prepare to jump");
                     mScreenshotTaken = true;
+//                    Image image = reader.acquireLatestImage();
                     new JumpTask(mJumper, mJumpParams, mJumpListener).execute(image);
                 }
             } catch (Exception e) {
@@ -126,7 +130,10 @@ public class ActionBar extends LinearLayout {
             @Override
             public void onInit() {
                 Log.d(TAG, "onInit: ");
-
+                if (mVirtualDisplay != null) {
+                    mVirtualDisplay.release();
+                    mVirtualDisplay = null;
+                }
             }
 
             @Override
@@ -134,21 +141,21 @@ public class ActionBar extends LinearLayout {
                 Log.d(TAG, String.format("onReady: press position, %s; press duration, %s.",
                         pressPosition.toString(), pressDuration));
                 setEnabled(false);
-                postDelayed(() -> setEnabled(true), pressDuration);
                 mActionListener.onJump(pressPosition, pressDuration);
+                //跳跃完成后，重置flag
+                postDelayed(() -> {
+                    setEnabled(true);
+                    mInProcess = false;
+                    mScreenshotTaken = false;
+                    ibJump.setEnabled(true);
+                }, pressDuration);
 
-                if (mVirtualDisplay != null) {
-
-                    mVirtualDisplay.release();
-                    mVirtualDisplay = null;
-                }
-
-                mInProcess = false;
-                mScreenshotTaken = false;
-
+                //小人儿跳到下一块石头上，并且挺好，开始下一次跳跃
                 if (tbAuto.isChecked()) {
-                    postDelayed(() -> ibJump.performClick(), pressDuration * 2);
-
+                    postDelayed(() -> {
+                        ibJump.performClick();
+                        ibJump.setEnabled(false);
+                    }, 2500 + new Random().nextInt(pressDuration));
                 }
             }
         };
@@ -196,13 +203,15 @@ public class ActionBar extends LinearLayout {
             public void onClick(View v) {
                 if (mVirtualDisplay != null) {
                     mVirtualDisplay.release();
+                    mVirtualDisplay = null;
                 }
                 if (mImageReader != null) {
                     mImageReader.close();
+                    mImageReader = null;
                 }
                 if (mMediaProjection != null) {
                     mMediaProjection.stop();
-                    mMediaProjection = null;
+//                    mMediaProjection = null;
                 }
                 mActionListener.onRemoveBar();
             }
