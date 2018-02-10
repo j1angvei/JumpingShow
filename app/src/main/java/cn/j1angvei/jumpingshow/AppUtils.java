@@ -60,7 +60,8 @@ public class AppUtils {
                 PrefsUtils.getCannyLowerThreshold(context),
                 PrefsUtils.getCannyUpperThreshold(context),
                 PrefsUtils.getJumpFactor(context),
-                PrefsUtils.isStoreMat(context)
+                PrefsUtils.isStoreMat(context),
+                PrefsUtils.getYCoordinateBelowScore(context)
         );
     }
 }

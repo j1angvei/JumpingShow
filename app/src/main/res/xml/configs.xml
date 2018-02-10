@@ -43,6 +43,12 @@
             android:key="stay_time"
             android:summary="两次跳跃之间间隔的时间，单位为ms"
             android:title="停留时间" />
+        <EditTextPreference
+            android:defaultValue="400"
+            android:key="y_below_score"
+            android:summary="游戏界面中，玩家得分下边界的y坐标，该参数用于截取出下一个落脚点区域"
+            android:title="得分Y坐标"
+            />
         <PreferenceScreen
             android:summary="从屏幕截图中识别台阶边缘"
             android:title="物体边缘检测">

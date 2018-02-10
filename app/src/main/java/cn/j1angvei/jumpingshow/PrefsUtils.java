@@ -122,5 +122,10 @@ public class PrefsUtils {
         return Integer.parseInt(timeString);
     }
 
+    public static int getYCoordinateBelowScore(Context context) {
+        String coordinateString = read(context).getString("y_below_score", "400");
+        return Integer.parseInt(coordinateString);
+    }
+
 }
 

@@ -116,8 +116,10 @@ public class JumpTask extends AsyncTask<Image, Void, Integer> {
         int stoneLeft = isInLeftScreen ?
                 (topLeftOfJumper.x + jumper.cols()) : 0;
         //石头的上边界，满足游戏中的三角形关系
-        int stoneTop = (int) (bottomCenterOfJumper.y - (mParams.triangleVerticalEdge *
-                Math.max(stoneLeft, screen.cols() - stoneLeft)));
+//        int stoneTop = (int) (bottomCenterOfJumper.y - (mParams.triangleVerticalEdge *
+//                Math.max(stoneLeft, screen.cols() - stoneLeft)));
+        int stoneTop = mParams.yBelowScore;
+
         //石头的右边界，小人儿的左边或者屏幕右边
         int stoneRight = isInLeftScreen ?
                 screen.cols() : topLeftOfJumper.x;

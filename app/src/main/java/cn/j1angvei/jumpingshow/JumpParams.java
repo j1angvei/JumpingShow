@@ -46,11 +46,13 @@ public final class JumpParams {
      */
     public final boolean storeMat;
 
+    public final int yBelowScore;
+
 
     public JumpParams(float scalingRatio, float bottomCenterPercentage,
                       float triangleVerticalEdge, float triangleBevelEdge,
                       double cannyLowerThreshold, double cannyUpperThreshold,
-                      float jumpFactor, boolean storeMat) {
+                      float jumpFactor, boolean storeMat, int yBelowScore) {
         this.scalingRatio = scalingRatio;
         this.bottomCenterPercentage = bottomCenterPercentage;
         this.triangleVerticalEdge = triangleVerticalEdge;
@@ -59,5 +61,6 @@ public final class JumpParams {
         this.cannyUpperThreshold = cannyUpperThreshold;
         this.jumpFactor = jumpFactor;
         this.storeMat = storeMat;
+        this.yBelowScore = yBelowScore;
     }
 }
