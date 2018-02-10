@@ -23,8 +23,6 @@ import org.opencv.core.Mat;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
-import java.util.Random;
-
 /**
  * @author j1angvei
  * @since 2018/2/1
@@ -155,7 +153,7 @@ public class ActionBar extends LinearLayout {
                     postDelayed(() -> {
                         ibJump.performClick();
                         ibJump.setEnabled(false);
-                    }, PrefsUtils.getStayTime(getContext()) + new Random().nextInt(pressDuration));
+                    }, PrefsUtils.getStayTime(getContext()) + pressDuration * 2);
                 }
             }
         };
@@ -201,16 +199,18 @@ public class ActionBar extends LinearLayout {
         ibExit.setOnClickListener(v -> {
             if (mVirtualDisplay != null) {
                 mVirtualDisplay.release();
-                mVirtualDisplay = null;
             }
+            mVirtualDisplay = null;
             if (mImageReader != null) {
                 mImageReader.close();
-                mImageReader = null;
             }
+            mImageReader = null;
             if (mMediaProjection != null) {
                 mMediaProjection.stop();
-                mMediaProjection = null;
             }
+            JSApplication.getInstance().setProjectionData(null);
+            mMediaProjection = null;
+
             mActionListener.onRemoveBar();
         });
         //开始辅助跳跃
