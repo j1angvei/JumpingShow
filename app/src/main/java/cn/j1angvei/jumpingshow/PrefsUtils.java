@@ -117,5 +117,10 @@ public class PrefsUtils {
         return read(context).getBoolean("save_screenshot", false);
     }
 
+    public static int getStayTime(Context context) {
+        String timeString = read(context).getString("stay_time", "3000");
+        return Integer.parseInt(timeString);
+    }
+
 }
 

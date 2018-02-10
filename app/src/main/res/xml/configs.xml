@@ -38,6 +38,11 @@
             android:key="jump_factor"
             android:summary="按压时间与跳远距离的关系"
             android:title="跳跃系数" />
+        <EditTextPreference
+            android:defaultValue="2500"
+            android:key="stay_time"
+            android:summary="两次跳跃之间间隔的时间，单位为ms"
+            android:title="停留时间" />
         <PreferenceScreen
             android:summary="从屏幕截图中识别台阶边缘"
             android:title="物体边缘检测">

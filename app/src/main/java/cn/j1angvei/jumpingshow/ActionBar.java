@@ -155,7 +155,7 @@ public class ActionBar extends LinearLayout {
                     postDelayed(() -> {
                         ibJump.performClick();
                         ibJump.setEnabled(false);
-                    }, 3000 + new Random().nextInt(pressDuration));
+                    }, PrefsUtils.getStayTime(getContext()) + new Random().nextInt(pressDuration));
                 }
             }
         };
