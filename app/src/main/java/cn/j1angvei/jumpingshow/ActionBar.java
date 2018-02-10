@@ -209,7 +209,7 @@ public class ActionBar extends LinearLayout {
             }
             if (mMediaProjection != null) {
                 mMediaProjection.stop();
-//                    mMediaProjection = null;
+                mMediaProjection = null;
             }
             mActionListener.onRemoveBar();
         });

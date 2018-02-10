@@ -3,6 +3,7 @@ package cn.j1angvei.jumpingshow;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -28,10 +29,11 @@ public class PermissionActivity extends AppCompatActivity {
     private static final int REQUEST_SCREEN_CAPTURE = 145;
 
     private static String[] STORAGE_PERMISSION = {Manifest.permission.WRITE_EXTERNAL_STORAGE};
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        mMediaProjectionManager = (MediaProjectionManager) getSystemService(MEDIA_PROJECTION_SERVICE);
         Intent intent = getIntent();
         if (intent.hasExtra(EXTRA_PERMISSION)) {
             String value = intent.getStringExtra(EXTRA_PERMISSION);
@@ -62,10 +64,7 @@ public class PermissionActivity extends AppCompatActivity {
                     AppUtils.toast(this, "已经授予录屏权限");
                     onBackPressed();
                 } else {
-                    MediaProjectionManager mpm = (MediaProjectionManager) getSystemService(MEDIA_PROJECTION_SERVICE);
-                    if (mpm != null) {
-                        startActivityForResult(mpm.createScreenCaptureIntent(), REQUEST_SCREEN_CAPTURE);
-                    }
+                    startActivityForResult(mMediaProjectionManager.createScreenCaptureIntent(), REQUEST_SCREEN_CAPTURE);
                 }
                 break;
 
@@ -74,10 +73,13 @@ public class PermissionActivity extends AppCompatActivity {
         }
     }
 
+    private MediaProjectionManager mMediaProjectionManager;
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_SCREEN_CAPTURE) {
-            JSApplication.getInstance().setProjectionData(resultCode,data);
+            MediaProjection mp = mMediaProjectionManager.getMediaProjection(resultCode, data);
+            JSApplication.getInstance().setProjectionData(mp);
             boolean granted = resultCode == RESULT_OK;
             String hint = granted ? "已经授予录屏权限" : "授权失败，无法进行屏幕截图";
             AppUtils.toast(this, hint);
