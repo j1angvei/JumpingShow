@@ -4,10 +4,13 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.Image;
+import android.os.Environment;
 import android.util.Log;
 
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
+import org.opencv.core.Scalar;
+import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
 import java.io.IOException;
@@ -74,4 +77,16 @@ public class ImageUtils {
         Bitmap bitmap = imageToBitmap(image);
         return bitmapToMat(bitmap);
     }
+
+
+    private static final String HOME_DIR = Environment.getExternalStorageDirectory().getAbsolutePath() + "/jumpingshow/";
+
+    public static void save(String fileName, Mat mat) {
+        Imgcodecs.imwrite(HOME_DIR + fileName, mat);
+    }
+
+    public static final Scalar RED = new Scalar(54, 67, 244);
+    public static final Scalar PURPLE = new Scalar(176, 39, 156);
+    public static final Scalar BLUE = new Scalar(243, 150, 33);
+    public static final Scalar WHITE = new Scalar(255, 255, 255);
 }

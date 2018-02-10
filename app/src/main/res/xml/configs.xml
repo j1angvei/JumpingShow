@@ -2,48 +2,56 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory android:title="基础设置">
         <SwitchPreference
-            android:key="main_switch"
             android:defaultValue="false"
+            android:key="main_switch"
             android:summaryOff="“跳一跳”辅助已经关闭"
             android:summaryOn="“跳一跳”辅助已经打开"
             android:title="总开关" />
         <ListPreference
-            android:key="action_bar_show_mode"
             android:defaultValue="@string/action_bar_show_manually"
-            android:dialogTitle="选择辅助开启方式"
             android:entries="@array/action_bar_show_mode"
             android:entryValues="@array/action_bar_show_mode"
+            android:key="action_bar_show_mode"
             android:summary="@string/action_bar_show_manually"
-            android:title="辅助开启方式" />
+            android:title="动作栏开启方式" />
+        <SwitchPreference
+            android:key="save_screenshot"
+            android:summaryOff="不保存辅助运行过程产生的任何图片"
+            android:summaryOn="保存辅助运行过程产生的所有图片到/sdcard/jumpingshow/中"
+            android:title="保存截图" />
+        <CheckBoxPreference
+            android:summaryOff="保存所有图片，小心存储空间不足"
+            android:summaryOn="辅助开始时，自动清空文件夹"
+            android:title="启动时自动清除历史图片" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="识别与测量">
 
         <EditTextPreference
-            android:key="bottle_scale_ratio"
             android:defaultValue="1.18181818"
             android:inputType="numberSigned|numberDecimal"
+            android:key="bottle_scale_ratio"
             android:summary="屏幕截图中小瓶子的缩放比例，原始大小为66x178"
             android:title="小瓶子缩放比" />
         <EditTextPreference
-            android:key="jump_factor"
             android:defaultValue="1.392"
+            android:key="jump_factor"
             android:summary="按压时间与跳远距离的关系"
             android:title="跳跃系数" />
         <PreferenceScreen
             android:summary="从屏幕截图中识别台阶边缘"
             android:title="物体边缘检测">
             <EditTextPreference
-                android:key="canny_lower"
                 android:defaultValue="40"
                 android:digits="1234567890"
                 android:inputType="numberDecimal"
+                android:key="canny_lower"
                 android:title="边缘检测下界限" />
             <EditTextPreference
-                android:key="canny_upper"
                 android:defaultValue="80"
                 android:digits="1234567890"
                 android:inputType="numberDecimal"
+                android:key="canny_upper"
                 android:title="边缘检测上界限" />
         </PreferenceScreen>
 
@@ -51,21 +59,21 @@
             android:summary="2.5D游戏场景中x轴、y轴、z轴的长度关系，满足勾股定理"
             android:title="三边关系">
             <EditTextPreference
-                android:key="axis_x"
                 android:defaultValue="100"
                 android:inputType="numberDecimal|numberSigned"
+                android:key="axis_x"
                 android:summary="屏幕中的水平边"
                 android:title="X轴" />
             <EditTextPreference
-                android:key="axis_y"
                 android:defaultValue="58"
                 android:inputType="numberDecimal|numberSigned"
+                android:key="axis_y"
                 android:summary="屏幕中的竖直边"
                 android:title="Y轴" />
             <EditTextPreference
-                android:key="axis_z"
                 android:defaultValue="115.602768"
                 android:inputType="numberDecimal|numberSigned"
+                android:key="axis_z"
                 android:summary="屏幕上的斜边，即连续两次落点之间的连线"
                 android:title="Z轴" />
         </PreferenceScreen>

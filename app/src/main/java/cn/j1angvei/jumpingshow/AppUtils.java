@@ -59,7 +59,8 @@ public class AppUtils {
                 PrefsUtils.getTriangleBevelRatio(context),
                 PrefsUtils.getCannyLowerThreshold(context),
                 PrefsUtils.getCannyUpperThreshold(context),
-                PrefsUtils.getJumpFactor(context)
+                PrefsUtils.getJumpFactor(context),
+                PrefsUtils.isStoreMat(context)
         );
     }
 }

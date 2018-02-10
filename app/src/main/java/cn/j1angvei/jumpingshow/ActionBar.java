@@ -155,7 +155,7 @@ public class ActionBar extends LinearLayout {
                     postDelayed(() -> {
                         ibJump.performClick();
                         ibJump.setEnabled(false);
-                    }, 2500 + new Random().nextInt(pressDuration));
+                    }, 3000 + new Random().nextInt(pressDuration));
                 }
             }
         };
@@ -198,23 +198,20 @@ public class ActionBar extends LinearLayout {
         //跳转到设置
         ibConfig.setOnClickListener(v -> AppUtils.toConfigs(getContext()));
         //点移除动作栏
-        ibExit.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mVirtualDisplay != null) {
-                    mVirtualDisplay.release();
-                    mVirtualDisplay = null;
-                }
-                if (mImageReader != null) {
-                    mImageReader.close();
-                    mImageReader = null;
-                }
-                if (mMediaProjection != null) {
-                    mMediaProjection.stop();
-//                    mMediaProjection = null;
-                }
-                mActionListener.onRemoveBar();
+        ibExit.setOnClickListener(v -> {
+            if (mVirtualDisplay != null) {
+                mVirtualDisplay.release();
+                mVirtualDisplay = null;
             }
+            if (mImageReader != null) {
+                mImageReader.close();
+                mImageReader = null;
+            }
+            if (mMediaProjection != null) {
+                mMediaProjection.stop();
+//                    mMediaProjection = null;
+            }
+            mActionListener.onRemoveBar();
         });
         //开始辅助跳跃
         ibJump.setOnClickListener(v -> {

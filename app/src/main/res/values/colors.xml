@@ -24,6 +24,10 @@
     <color name="green">#4CAF50</color>
     <color name="red">#F44336</color>
 
+    <color name="grey">#9E9E9E</color>
+    <color name="greyLight">#E0E0E0</color>
+    <color name="greyDark">#616161</color>
+
     <color name="black11">#11000000</color>
     <color name="black33">#33000000</color>
 </resources>

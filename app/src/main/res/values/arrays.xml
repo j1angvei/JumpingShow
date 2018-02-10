@@ -5,4 +5,10 @@
         <item>@string/action_bar_show_automatically</item>
         <item>@string/action_bar_show_never</item>
     </string-array>
+
+    <string-array name="action_bar_show_hint">
+        <item>辅助开关打开后，立即显示辅助动作栏</item>
+        <item>微信界面出现跳一跳入口，点击通知显示辅助动作栏</item>
+        <item>始终不显示辅助动作栏</item>
+    </string-array>
 </resources>

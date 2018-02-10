@@ -33,4 +33,17 @@
         <item name="android:textOff">@null</item>
 
     </style>
+
+    <style name="AppTheme.Title">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/black</item>
+    </style>
+
+    <style name="AppTheme.Container" />
+
+    <style name="AppTheme.Input" parent="Widget.AppCompat.EditText">
+        <item name="android:inputType">numberSigned|numberDecimal</item>
+
+    </style>
+
 </resources>

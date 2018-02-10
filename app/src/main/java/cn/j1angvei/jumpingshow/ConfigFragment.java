@@ -1,9 +1,14 @@
 package cn.j1angvei.jumpingshow;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 
 /**
  * @author j1angvei
@@ -30,6 +35,26 @@ public class ConfigFragment extends PreferenceFragment {
                         .setAction("开启", v -> AppUtils.toAccessibility(getContext())).show();
             }
             return backstageReady;
+        });
+
+        findPreference("save_screenshot").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                //用户关闭开关
+                boolean newBoolValue = (boolean) newValue;
+
+                //关闭开关
+                if (!newBoolValue) {
+                    return true;
+                }
+
+                //打开开关，先检查权限
+                boolean granted = PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(getContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE);
+                if (!granted) {
+                    ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 148);
+                }
+                return granted;
+            }
         });
 
     }

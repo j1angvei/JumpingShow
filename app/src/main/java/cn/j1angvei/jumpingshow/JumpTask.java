@@ -1,6 +1,5 @@
 package cn.j1angvei.jumpingshow;
 
-import android.graphics.ImageFormat;
 import android.graphics.Point;
 import android.media.Image;
 import android.os.AsyncTask;
@@ -22,6 +21,7 @@ public class JumpTask extends AsyncTask<Image, Void, Integer> {
     private JumpParams mParams;
     private JumpListener mJumpListener;
     private Point pressPosition;
+    private String filePrefix;
 
     public JumpTask(Mat jumper, JumpParams params, JumpListener jumpListener) {
         mJumper = jumper;
@@ -33,6 +33,7 @@ public class JumpTask extends AsyncTask<Image, Void, Integer> {
     protected void onPreExecute() {
         super.onPreExecute();
         mJumpListener.onInit();
+        filePrefix = System.currentTimeMillis() + "_";
     }
 
     @Override
@@ -49,6 +50,11 @@ public class JumpTask extends AsyncTask<Image, Void, Integer> {
                 topLeftOfJumper.x + mJumper.cols() / 2,
                 (int) (topLeftOfJumper.y + mJumper.rows() * mParams.bottomCenterPercentage));
 
+        if (mParams.storeMat) {
+            Mat screenWithStart = screen.clone();
+            Imgproc.circle(screenWithStart, new org.opencv.core.Point(bottomCenterOfJumper.x, bottomCenterOfJumper.y), 4, ImageUtils.RED);
+            ImageUtils.save(filePrefix + "1_screen.png", screenWithStart);
+        }
         //跳跃时按压的坐标
         pressPosition = bottomCenterOfJumper;
 
@@ -119,10 +125,17 @@ public class JumpTask extends AsyncTask<Image, Void, Integer> {
         //下一个落脚点的粗略区域的mat
         Mat stone = screen.submat(stoneTop, stoneBottom, stoneLeft, stoneRight);
 
+        if (mParams.storeMat) {
+            ImageUtils.save(filePrefix + "2_stone.png", stone);
+        }
+
         //提取石头的边缘
         Mat stoneBounds = stone.clone();
         Imgproc.Canny(stone, stoneBounds, mParams.cannyLowerThreshold, mParams.cannyUpperThreshold);
 
+        if (mParams.storeMat) {
+            ImageUtils.save(filePrefix + "3_canny.png", stoneBounds);
+        }
 
         //获取石头边缘的最高点（y值最小，相同则取中间点）
         boolean inWhite = false;
@@ -130,6 +143,7 @@ public class JumpTask extends AsyncTask<Image, Void, Integer> {
         //石头边缘顶部的起点和终点的横坐标x
         int topStartXOfBounds = 0;
         int topEndXOfBounds = 0;
+        int topCenterY = 0;
 
         //遍历石头mat，寻找最顶部的白色中间点的横坐标x，如果为白色线段，取中点的横坐标x
         for (int y = 0; y < stoneBounds.rows(); y++) {
@@ -138,6 +152,7 @@ public class JumpTask extends AsyncTask<Image, Void, Integer> {
                 if (!inWhite && color[0] == 255f) {
                     inWhite = true;
                     topStartXOfBounds = x;
+                    topCenterY = y;
                     continue;
                 }
                 if (inWhite && color[0] != 255f) {
@@ -151,9 +166,16 @@ public class JumpTask extends AsyncTask<Image, Void, Integer> {
         }
         //石头边缘顶点的横坐标x
         int topCenterX = (topStartXOfBounds + topEndXOfBounds) / 2 + stoneLeft;
+        topCenterY += stoneTop;
+
+        if (mParams.storeMat) {
+            Mat screenWithTopCenterDot = screen.clone();
+            Imgproc.circle(screenWithTopCenterDot, new org.opencv.core.Point(topCenterX, topCenterY), 4, ImageUtils.PURPLE);
+            ImageUtils.save(filePrefix + "4_top_center.png", screenWithTopCenterDot);
+        }
         Log.d(TAG, "calculatePressDuration: top center x of bounds," + topCenterX);
         //跳跃起点与跳跃终点的水平距离
-        int horizontalDistance = Math.abs((int) bottomCenterOfJumper.x - topCenterX);
+        int horizontalDistance = Math.abs(bottomCenterOfJumper.x - topCenterX);
         Log.d(TAG, "calculatePressDuration: horizontal distance " + horizontalDistance);
         //跳跃起点与跳跃终点的连线距离
         float jumpDistance = mParams.triangleBevelEdge * horizontalDistance;

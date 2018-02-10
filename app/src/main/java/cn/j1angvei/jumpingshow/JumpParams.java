@@ -37,21 +37,20 @@ public final class JumpParams {
     public final double cannyUpperThreshold;
 
     /**
-     * 左手手指按压点
-     */
-    /**
-     * 右手手指按压点
-     */
-    /**
      * 跳跃系数，跳跃距离与按压时间的关系
      */
     public final float jumpFactor;
+
+    /**
+     * 保存所有mat截图
+     */
+    public final boolean storeMat;
 
 
     public JumpParams(float scalingRatio, float bottomCenterPercentage,
                       float triangleVerticalEdge, float triangleBevelEdge,
                       double cannyLowerThreshold, double cannyUpperThreshold,
-                      float jumpFactor) {
+                      float jumpFactor, boolean storeMat) {
         this.scalingRatio = scalingRatio;
         this.bottomCenterPercentage = bottomCenterPercentage;
         this.triangleVerticalEdge = triangleVerticalEdge;
@@ -59,5 +58,6 @@ public final class JumpParams {
         this.cannyLowerThreshold = cannyLowerThreshold;
         this.cannyUpperThreshold = cannyUpperThreshold;
         this.jumpFactor = jumpFactor;
+        this.storeMat = storeMat;
     }
 }

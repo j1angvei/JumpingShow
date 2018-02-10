@@ -77,38 +77,44 @@ public class PrefsUtils {
     public static final String KEY_SCALE_RATIO = "bottle_scale_ratio";
 
     public static float getScalingRatio(Context context) {
-        String ratio= read(context).getString("scaling_ratio", "1.1818");
+        String ratio = read(context).getString("scaling_ratio", "1.1818");
         return Float.valueOf(ratio);
     }
 
     public static final String KEY_BOTTOM_CENTER_3D = "bottom_center_3d";
 
-    public static  float getBottomCenterPercentage(Context context) {
-        String percentage= read(context).getString(KEY_BOTTOM_CENTER_3D, "0.910112");
+    public static float getBottomCenterPercentage(Context context) {
+        String percentage = read(context).getString(KEY_BOTTOM_CENTER_3D, "0.910112");
         return Float.parseFloat(percentage);
     }
-    public static  float getTriangleVerticalRatio(Context context){
-        String ratio= read(context).getString("triangle_vertical_ratio","0.58");
-        return Float.parseFloat(ratio);
-    }
-    public static  float getTriangleBevelRatio(Context context){
-        String ratio= read(context).getString("triangle_bevel_ratio","1.156");
+
+    public static float getTriangleVerticalRatio(Context context) {
+        String ratio = read(context).getString("triangle_vertical_ratio", "0.58");
         return Float.parseFloat(ratio);
     }
 
-    public static double getCannyLowerThreshold(Context context){
-        String threshold= read(context).getString("canny_lower_threshold","40");
+    public static float getTriangleBevelRatio(Context context) {
+        String ratio = read(context).getString("triangle_bevel_ratio", "1.156");
+        return Float.parseFloat(ratio);
+    }
+
+    public static double getCannyLowerThreshold(Context context) {
+        String threshold = read(context).getString("canny_lower_threshold", "20");
         return Double.parseDouble(threshold);
     }
 
-    public static double getCannyUpperThreshold(Context context){
-        String threshold= read(context).getString("canny_upper_threshold","80");
+    public static double getCannyUpperThreshold(Context context) {
+        String threshold = read(context).getString("canny_upper_threshold", "70");
         return Double.parseDouble(threshold);
     }
 
-    public static float getJumpFactor(Context context){
-        String factor= read(context).getString("jump_factor","1.392");
+    public static float getJumpFactor(Context context) {
+        String factor = read(context).getString("jump_factor", "1.392");
         return Float.parseFloat(factor);
+    }
+
+    public static boolean isStoreMat(Context context) {
+        return read(context).getBoolean("save_screenshot", false);
     }
 
 }
