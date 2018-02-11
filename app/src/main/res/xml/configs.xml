@@ -25,7 +25,9 @@
             android:title="启动时自动清除历史图片" />
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="识别与测量">
+    <PreferenceCategory
+        android:summary="计算起跳点坐标的必需参数"
+        android:title="起跳区参数">
 
         <EditTextPreference
             android:defaultValue="1.18181818"
@@ -33,6 +35,42 @@
             android:key="bottle_scale_ratio"
             android:summary="屏幕截图中小瓶子的缩放比例，原始大小为66x178"
             android:title="小瓶子缩放比" />
+        <EditTextPreference
+            android:inputType="numberSigned|numberDecimal"
+            android:key="0.912"
+            android:summary="小人儿的底部（3D）中心就是跳跃起点，x坐标是小人儿的中心，y坐标是小人儿最胖的地方，百分比就是y坐标与小瓶子身高之比"
+            android:title="底部中心百分比" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:summary="跳跃过程中的计算下一步落脚点坐标的必需参数"
+        android:title="着陆区参数">
+
+        <EditTextPreference
+            android:defaultValue="400"
+            android:digits="1234567890"
+            android:inputType="number"
+            android:key="y_below_score"
+            android:summary="游戏界面中，玩家得分下边界的y坐标，该参数用于截取出下一个落脚点区域"
+            android:title="得分Y坐标" />
+        <EditTextPreference
+            android:defaultValue="20"
+            android:digits="1234567890"
+            android:inputType="numberDecimal"
+            android:key="canny_lower_threshold"
+            android:summary="该值越低，保留的边界细节越多，也容易对过滤真正的边界造成影响"
+            android:title="边缘检测低阈值" />
+        <EditTextPreference
+            android:defaultValue="70"
+            android:digits="1234567890"
+            android:inputType="numberDecimal"
+            android:key="canny_upper_threshold"
+            android:summary="该值越高，保留的物体边界越少，越不容易检测到下一步的着陆点"
+            android:title="边缘检测高阈值" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:summary="计算跳跃距离的必需参数"
+        android:title="距离参数">
         <EditTextPreference
             android:defaultValue="1.392"
             android:key="jump_factor"
@@ -44,79 +82,17 @@
             android:summary="两次跳跃之间间隔的时间，单位为ms"
             android:title="停留时间" />
         <EditTextPreference
-            android:defaultValue="400"
-            android:key="y_below_score"
-            android:summary="游戏界面中，玩家得分下边界的y坐标，该参数用于截取出下一个落脚点区域"
-            android:title="得分Y坐标"
-            />
-        <PreferenceScreen
-            android:summary="从屏幕截图中识别台阶边缘"
-            android:title="物体边缘检测">
-            <EditTextPreference
-                android:defaultValue="40"
-                android:digits="1234567890"
-                android:inputType="numberDecimal"
-                android:key="canny_lower"
-                android:title="边缘检测下界限" />
-            <EditTextPreference
-                android:defaultValue="80"
-                android:digits="1234567890"
-                android:inputType="numberDecimal"
-                android:key="canny_upper"
-                android:title="边缘检测上界限" />
-        </PreferenceScreen>
-
-        <PreferenceScreen
-            android:summary="2.5D游戏场景中x轴、y轴、z轴的长度关系，满足勾股定理"
-            android:title="三边关系">
-            <EditTextPreference
-                android:defaultValue="100"
-                android:inputType="numberDecimal|numberSigned"
-                android:key="axis_x"
-                android:summary="屏幕中的水平边"
-                android:title="X轴" />
-            <EditTextPreference
-                android:defaultValue="58"
-                android:inputType="numberDecimal|numberSigned"
-                android:key="axis_y"
-                android:summary="屏幕中的竖直边"
-                android:title="Y轴" />
-            <EditTextPreference
-                android:defaultValue="115.602768"
-                android:inputType="numberDecimal|numberSigned"
-                android:key="axis_z"
-                android:summary="屏幕上的斜边，即连续两次落点之间的连线"
-                android:title="Z轴" />
-        </PreferenceScreen>
+            android:defaultValue="0.58"
+            android:inputType="numberDecimal|numberSigned"
+            android:key="triangle_vertical_ratio"
+            android:summary="跳跃起点和终点的连线，与屏幕x轴、y轴构成一个直角三角形，根据三边长度关系计算跳跃距离"
+            android:title="竖直边/水平边" />
+        <EditTextPreference
+            android:defaultValue="1.156"
+            android:inputType="numberDecimal|numberSigned"
+            android:key="triangle_bevel_ratio"
+            android:summary="跳跃起点和终点的连线，与屏幕x轴、y轴构成一个直角三角形，根据三边长度关系计算跳跃距离"
+            android:title="斜边/水平边" />
     </PreferenceCategory>
-    <PreferenceCategory android:title="随机设置">
-        <PreferenceScreen
-            android:summary="针对音乐盒、下水道、魔方、超市等的处理方式"
-            android:title="加分项">
-            <PreferenceCategory android:title="停留设置">
 
-                <SwitchPreference android:title="加分项停留" />
-                <SwitchPreference android:title="随机停留" />
-                <EditTextPreference android:title="随机停留的概率" />
-
-            </PreferenceCategory>
-            <PreferenceCategory android:title="停留时间">
-
-                <CheckBoxPreference android:title="随机停留时间" />
-                <EditTextPreference android:title="停留最短时间" />
-                <EditTextPreference android:title="停留最长时间" />
-            </PreferenceCategory>
-        </PreferenceScreen>
-
-        <PreferenceScreen
-            android:summary="两次跳跃之间停留的时间,不考虑加分项"
-            android:title="跳跃间隔">
-            <CheckBoxPreference
-                android:summaryOff="跳跃间隔为最小间隔"
-                android:summaryOn="跳跃间隔在最大、最小间隔之间随机产生"
-                android:title="随机间隔时间" />
-            <EditTextPreference android:title="最小跳跃间隔" />
-            <EditTextPreference android:title="最大跳跃间隔" />
-        </PreferenceScreen>
-    </PreferenceCategory>
 </PreferenceScreen>
