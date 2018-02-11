@@ -50,7 +50,7 @@
             android:digits="1234567890"
             android:inputType="number"
             android:key="y_below_score"
-            android:summary="游戏界面中，玩家得分下边界的y坐标，该参数用于截取出下一个落脚点区域"
+            android:summary="游戏界面中，玩家得分下边界的y坐标，单位为像素"
             android:title="得分Y坐标" />
         <EditTextPreference
             android:defaultValue="20"
