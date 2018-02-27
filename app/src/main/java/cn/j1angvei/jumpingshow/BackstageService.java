@@ -154,7 +154,7 @@ public class BackstageService extends AccessibilityService {
                 pressPath.moveTo(x, y);
                 pressPath.lineTo(x + new Random().nextInt(10), y + new Random().nextInt(10));
                 GestureDescription.Builder builder = new GestureDescription.Builder();
-                builder.addStroke(new GestureDescription.StrokeDescription(pressPath, 100, pressDuration));
+                builder.addStroke(new GestureDescription.StrokeDescription(pressPath, 0, pressDuration));
                 Log.d(TAG, "onJump: Start jump");
                 try {
 
