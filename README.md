@@ -67,7 +67,7 @@
 * 两次跳跃间隔时间太短会导致截图失败，所以会停留较长时间（3s左右）；
 * 后续通过申请ROOT权限降低辅助APP对Android系统的要求；
 
-### 六、 参考资料
+## 六、 参考资料
 * Accessibility: [Developing an Accessibility Service for Android](https://codelabs.developers.google.com/codelabs/developing-android-a11y-service/index.html#0)
 * MediaProjection: [Google sample, android-ScreenCapture](https://github.com/googlesamples/android-screenCapture)
 * OpenCV: [OpenCV 3.4.1 Documentation](https://docs.opencv.org/3.4.1/)
